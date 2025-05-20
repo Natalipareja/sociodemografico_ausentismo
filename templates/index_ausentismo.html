@@ -1,0 +1,539 @@
+{% extends "nav.html" %}
+
+{% block title %}Registro de Ausentismo{% endblock %}
+
+{% block head_extra %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_reporte_ausentismo.css') }}">
+{% endblock %}
+
+{% block content %}
+    <h2>Formulario Datos Ausentismo</h2>
+    <div id="form-message" class="message" style="display: none;"></div>
+
+    <form id="ausentismo-form" action="{{ url_for('ausentismo.guardar_ausentismo') }}" method="POST"
+          data-url-obtener-empleado="{{ url_for('ausentismo.obtener_datos_empleado') }}">
+
+        <div id="progressBarContainer">
+            <div id="progressBar">Paso 1 de 3</div>
+        </div>
+
+        <div class="wizard-step active" id="step1">
+            <h3>Paso 1: Información de Registro</h3>
+            <div class="step-content-columns">
+                <div class="form-column">
+                    <label for="usuario">Usuario (Quien registra):</label>
+                    <input type="text" name="usuario" id="usuario" value="39457318" required readonly><br>
+                    
+                    <label for="tipo_documento">Tipo de Documento Empleado:</label>
+                    <select name="tipo_documento" id="tipo_documento" required>
+                        <option value="">Seleccione...</option>
+                        {% for tipo in tipos_documentos %}
+                            <option value="{{ tipo }}">{{ tipo }}</option>
+                        {% endfor %}
+                    </select><br>
+                </div>
+                <div class="form-column">
+                    <label for="documento_identidad">Número de Documento de Identidad Empleado:</label>
+                    <input type="text" name="documento_identidad" id="documento_identidad" required><br>
+                </div>
+            </div>
+            <div class="wizard-buttons">
+                <button type="button" class="btn-next" onclick="nextPrev(1)">Siguiente</button>
+            </div>
+        </div>
+
+        <div class="wizard-step" id="step2">
+            <h3>Paso 2: Datos del Empleado (Se autocompletan)</h3>
+            <div class="step-content-columns">
+                <div class="form-column">
+                    <label for="primer_nombre">Primer Nombre:</label>
+                    <input type="text" name="primer_nombre" id="primer_nombre" required readonly><br>
+                    
+                    <label for="segundo_nombre">Segundo Nombre:</label>
+                    <input type="text" name="segundo_nombre" id="segundo_nombre" readonly><br>
+                    
+                    <label for="primer_apellido">Primer Apellido:</label>
+                    <input type="text" name="primer_apellido" id="primer_apellido" required readonly><br>
+                    
+                    <label for="segundo_apellido">Segundo Apellido:</label>
+                    <input type="text" name="segundo_apellido" id="segundo_apellido" readonly><br>
+                    
+                    <label for="fecha_nacimiento">Fecha de Nacimiento:</label>
+                    <input type="date" name="fecha_nacimiento" id="fecha_nacimiento" required readonly><br>
+                    
+                    <label for="sexo">Sexo:</label>
+                    <select name="sexo" id="sexo" required disabled>
+                        <option value="">Seleccione...</option>
+                        <option value="Masculino">Masculino</option>
+                        <option value="Femenino">Femenino</option>
+                    </select><br>
+                    
+                    <label for="fecha_ingreso_empresa">Fecha de Ingreso a la Empresa:</label>
+                    <input type="date" name="fecha_ingreso_empresa" id="fecha_ingreso_empresa" required readonly><br>
+
+                    <label for="tipo_contrato">Tipo de Contrato:</label>
+                    <select id="tipo_contrato" name="tipo_contrato" required disabled>
+                        <option value="">Seleccione un tipo</option>
+                        {% for tc in tipos_contrato %}
+                            <option value="{{ tc.codigo }}">{{ tc.nombre }}</option>
+                        {% endfor %}
+                    </select><br>
+                </div>
+                <div class="form-column">
+                    <label for="cargo">Cargo:</label>
+                    <select id="cargo" name="cargo" required disabled>
+                        <option value="">Seleccione un cargo</option>
+                        {% for c in cargos %}
+                            <option value="{{ c.codigo }}">{{ c.nombre }}</option>
+                        {% endfor %}
+                    </select><br>
+                    
+                    <label for="area">Área:</label>
+                    <select id="area" name="area" required disabled>
+                        <option value="">Seleccione un área</option>
+                        {% for a in areas %}
+                            <option value="{{ a.codigo }}">{{ a.nombre }}</option>
+                        {% endfor %}
+                    </select><br>
+                    
+                    <label for="proceso">Proceso:</label>
+                    <select id="proceso" name="proceso" required disabled>
+                        <option value="">Seleccione un proceso</option>
+                        {% for p in procesos %}
+                            <option value="{{ p.codigo }}">{{ p.nombre }}</option>
+                        {% endfor %}
+                    </select><br>
+                    
+                    <label for="turno_trabajo">Turno de Trabajo:</label>
+                    <select id="turno_trabajo" name="turno_trabajo" required disabled>
+                        <option value="">Seleccione un turno</option>
+                        {% for tt in turnos_trabajo %}
+                            <option value="{{ tt.codigo }}">{{ tt.nombre }}</option>
+                        {% endfor %}
+                    </select><br>
+                    
+                    <label for="eps">EPS (Código):</label>
+                    <input type="text" name="eps" id="eps" required readonly><br>
+                    
+                    <label for="afp">AFP (Código):</label>
+                    <input type="text" name="afp" id="afp" required readonly><br>
+                    
+                    <label for="ciudad">Ciudad (Código):</label>
+                    <input type="text" name="ciudad" id="ciudad" required readonly><br>
+                </div>
+            </div>
+            <div class="wizard-buttons">
+                <button type="button" class="btn-prev" onclick="nextPrev(-1)">Anterior</button>
+                <button type="button" class="btn-next" onclick="nextPrev(1)">Siguiente</button>
+            </div>
+        </div>
+
+        <div class="wizard-step" id="step3">
+            <h3>Paso 3: Datos del Nuevo Ausentismo</h3>
+            <div class="step-content-columns">
+                <div class="form-column">
+                    <label for="codigo">Código diagnóstico CIE-10:</label>
+                    <div class="input-group"> <input name="codigo" id="codigo" type="text">
+                        <button type="button" class="btn-search-cie10" onclick="buscarEnfermedad()">Buscar CIE-10</button>
+                    </div>
+                    <br>
+
+                    <label for="nombre">Nombre Diagnóstico:</label> <input type="text" name="nombre" id="nombre" readonly><br> 
+
+                    <label for="grupo">Grupo Relacionado Diagnóstico:</label>
+                    <input type="text" name="grupo" id="grupo" readonly><br> 
+
+                    <label for="segmento">Segmento Afectado:</label>
+                    <input type="text" name="segmento" id="segmento" readonly><br>
+                </div>
+                <div class="form-column">
+                    <label for="clase_incapacidad">Clase de Incapacidad:</label>
+                    <select id="clase_incapacidad" name="clase_incapacidad" required>
+                        <option value="">Seleccione la Clase...</option>
+                        {% for clase in clases_incapacidades %}
+                            <option value="{{ clase.codigo }}">{{ clase.nombre }}</option>
+                        {% endfor %}
+                    </select><br>
+
+                    <label for="fecha_inicial">Fecha Inicial Ausentismo:</label>
+                    <input type="date" name="fecha_inicial" id="fecha_inicial" required><br>
+
+                    <label for="fecha_final">Fecha Final Ausentismo:</label>
+                    <input type="date" name="fecha_final" id="fecha_final" required><br>
+
+                    <label for="tipo_incapacidad">Tipo de Incapacidad:</label>
+                    <select id="tipo_incapacidad" name="tipo_incapacidad" required>
+                        <option value="">Seleccione el Tipo...</option>
+                        {% for tipo in tipos_incapacidades %}
+                            <option value="{{ tipo.codigo }}">{{ tipo.nombre }}</option>
+                        {% endfor %}
+                    </select><br>
+                </div>
+            </div>
+            <div class="wizard-buttons">
+                <button type="button" class="btn-prev" onclick="nextPrev(-1)">Anterior</button>
+                <button type="submit" id="submitButton" class="btn-submit">Guardar Nuevo Ausentismo</button>
+            </div>
+        </div>
+    </form>
+{% endblock %} 
+
+{% block scripts %}
+    <script>
+        // Tu script existente para buscarEnfermedad, lógica de DOMContentLoaded, etc.
+        // ... (pega aquí TODO tu script original que estaba en el bloque scripts) ...
+        // A CONTINUACIÓN, SE AÑADIRÁ EL SCRIPT DEL WIZARD.
+        // Asegúrate de que el siguiente script del wizard se coloque DESPUÉS de tu script original
+        // o que la inicialización del wizard (showStep(currentStep)) se llame dentro
+        // de tu `DOMContentLoaded` después de que todo lo demás esté configurado.
+
+//---------------------------------------------------------------------
+// VALORES INYECTADOS POR FLASK (JINJA2)
+//---------------------------------------------------------------------
+const OBTENER_EMPLEADO_URL_BASE = "{{ url_for('ausentismo.obtener_datos_empleado') }}";
+
+//---------------------------------------------------------------------
+// FUNCIÓN buscarEnfermedad() (como la proporcionaste)
+//---------------------------------------------------------------------
+function buscarEnfermedad() {
+    const codigoInput = document.getElementById("codigo");
+    const codigoEnMayusculas = codigoInput.value.toUpperCase();
+    codigoInput.value = codigoEnMayusculas;
+
+    fetch("https://alejandropr23.github.io/JsonCie/cie10.json")
+        .then(response => {
+            if (!response.ok) { throw new Error(`Error HTTP: ${response.status}`); }
+            return response.json();
+        })
+        .then(data => {
+            const resultado = data.find(item => item.codigo === codigoEnMayusculas);
+            if (resultado) {
+                document.getElementById("nombre").value = resultado.nombre;
+                document.getElementById("grupo").value = resultado.grupo;
+                document.getElementById("segmento").value = resultado.segmento;
+            } else {
+                document.getElementById("nombre").value = '';
+                document.getElementById("grupo").value = '';
+                document.getElementById("segmento").value = '';
+                console.log(`Código CIE-10 '${codigoEnMayusculas}' no encontrado en el JSON.`);
+            }
+        })
+        .catch(error => {
+            console.error('Error al buscar enfermedad CIE-10:', error);
+            document.getElementById("nombre").value = '';
+            document.getElementById("grupo").value = '';
+            document.getElementById("segmento").value = '';
+        });
+}
+
+//---------------------------------------------------------------------
+// LÓGICA PRINCIPAL DEL FORMULARIO (AL CARGAR EL DOM)
+//---------------------------------------------------------------------
+document.addEventListener('DOMContentLoaded', function () {
+    console.log("--- Script ausentismo cargado y DOM listo ---");
+
+    const documentoIdentidadInput = document.getElementById('documento_identidad');
+    const form = document.getElementById('ausentismo-form');
+    const messageDiv = document.getElementById('form-message');
+    // ... (resto de tus constantes para los campos del empleado y ausentismo)
+    const primerNombreInput = document.getElementById('primer_nombre');
+    const segundoNombreInput = document.getElementById('segundo_nombre');
+    const primerApellidoInput = document.getElementById('primer_apellido');
+    const segundoApellidoInput = document.getElementById('segundo_apellido');
+    const fechaNacimientoInput = document.getElementById('fecha_nacimiento');
+    const sexoSelect = document.getElementById('sexo');
+    const fechaIngresoInput = document.getElementById('fecha_ingreso_empresa');
+    const tipoContratoSelect = document.getElementById('tipo_contrato');
+    const cargoSelect = document.getElementById('cargo');
+    const areaSelect = document.getElementById('area');
+    const procesoSelect = document.getElementById('proceso');
+    const turnoTrabajoSelect = document.getElementById('turno_trabajo');
+    const epsInput = document.getElementById('eps');
+    const afpInput = document.getElementById('afp');
+    const ciudadInput = document.getElementById('ciudad');
+    const claseIncapacidadSelect = document.getElementById('clase_incapacidad');
+    const fechaInicialInput = document.getElementById('fecha_inicial');
+    const fechaFinalInput = document.getElementById('fecha_final');
+    const tipoIncapacidadSelect = document.getElementById('tipo_incapacidad');
+    const grupoInput = document.getElementById('grupo');
+    const segmentoInput = document.getElementById('segmento');
+    const codigoCIE10Input = document.getElementById('codigo'); // Para limpieza
+    const nombreCIE10Input = document.getElementById('nombre'); // Para limpieza
+
+    const camposEmpleadoBloqueados = [
+        primerNombreInput, segundoNombreInput, primerApellidoInput, segundoApellidoInput,
+        fechaNacimientoInput, sexoSelect, fechaIngresoInput, tipoContratoSelect, cargoSelect,
+        areaSelect, procesoSelect, turnoTrabajoSelect, epsInput, afpInput, ciudadInput
+    ];
+    const camposAusentismoLimpiar = [
+        claseIncapacidadSelect, fechaInicialInput, fechaFinalInput, tipoIncapacidadSelect,
+        codigoCIE10Input, nombreCIE10Input, grupoInput, segmentoInput
+    ];
+
+    function limpiarCampos(campos) {
+        campos.forEach(campo => {
+            if (!campo) return;
+            if (campo.tagName === 'SELECT') campo.value = '';
+            else if (campo.tagName === 'INPUT') campo.value = '';
+        });
+    }
+    function bloquearCamposEmpleado(bloquear = true) {
+        camposEmpleadoBloqueados.forEach(campo => {
+            if (!campo) return;
+            if (campo.tagName === 'SELECT') {
+                campo.disabled = bloquear;
+            } else if (campo.tagName === 'INPUT' && (campo.type === 'text' || campo.type === 'date')) {
+                campo.readOnly = bloquear;
+            }
+            campo.style.backgroundColor = bloquear ? '#f0f0f0' : ''; // Usar un gris más suave
+            campo.style.cursor = bloquear ? 'not-allowed' : '';
+        });
+    }
+    function habilitarCamposAusentismo(habilitar = true) {
+        const camposAusentismo = [ claseIncapacidadSelect, fechaInicialInput, fechaFinalInput, tipoIncapacidadSelect, document.getElementById('codigo')];
+        camposAusentismo.forEach(campo => {
+            if (!campo) return;
+            if (campo.id === 'codigo' && document.activeElement === campo) {
+                // No hacer nada
+            } else if (campo.tagName === 'SELECT') {
+                campo.disabled = !habilitar;
+            } else if (campo.tagName === 'INPUT') {
+                campo.readOnly = !habilitar;
+            }
+            if(campo.id !== 'codigo') {
+                campo.style.backgroundColor = !habilitar ? '#f0f0f0' : '';
+                campo.style.cursor = !habilitar ? 'not-allowed' : '';
+            }
+        });
+        [document.getElementById('nombre'), grupoInput, segmentoInput].forEach(c => {
+            if(c){ c.readOnly=true; c.disabled=false; c.style.backgroundColor='#f0f0f0'; c.style.cursor='default';}
+        });
+    }
+    function mostrarMensaje(texto, tipo = 'error') {
+        if(messageDiv){
+            messageDiv.textContent = texto;
+            messageDiv.className = `message ${tipo}`; // Asegúrate que .message.error y .message.success estén estilizados
+            messageDiv.style.display = 'block';
+        }
+    }
+    function ocultarMensaje() {
+        if(messageDiv){
+            messageDiv.style.display = 'none';
+            messageDiv.textContent = '';
+            messageDiv.className = 'message';
+        }
+    }
+
+    bloquearCamposEmpleado(true);
+    habilitarCamposAusentismo(false);
+
+    if (documentoIdentidadInput) {
+      documentoIdentidadInput.addEventListener('blur', function () {
+          const documentoIdentidad = this.value.trim();
+          ocultarMensaje();
+          limpiarCampos(camposEmpleadoBloqueados);
+          bloquearCamposEmpleado(true);
+          limpiarCampos(camposAusentismoLimpiar);
+          habilitarCamposAusentismo(false);
+
+          if (documentoIdentidad) {
+              if (!OBTENER_EMPLEADO_URL_BASE) {
+                  mostrarMensaje("Error de configuración: Falta la URL de búsqueda de empleado.", "error");
+                  return;
+              }
+              mostrarMensaje("Buscando empleado...", "info");
+              const fetchUrl = `${OBTENER_EMPLEADO_URL_BASE}?documento_identidad=${encodeURIComponent(documentoIdentidad)}`;
+              fetch(fetchUrl)
+                  .then(response => {
+                      if (!response.ok) {
+                          return response.json().then(errData => { throw new Error(errData.error || `Error HTTP ${response.status}`); })
+                                        .catch(() => { throw new Error(`Error HTTP ${response.status}: ${response.statusText}`); });
+                      }
+                      return response.json();
+                  })
+                  .then(dataEmpleado => {
+                      ocultarMensaje();
+                      if (dataEmpleado && Object.keys(dataEmpleado).length > 0 && !dataEmpleado.error) {
+                          if(primerNombreInput) primerNombreInput.value = dataEmpleado.primer_nombre || '';
+                          if(segundoNombreInput) segundoNombreInput.value = dataEmpleado.segundo_nombre || '';
+                          // ... (resto de tu lógica para poblar campos)
+                          if(primerApellidoInput) primerApellidoInput.value = dataEmpleado.primer_apellido || '';
+                          if(segundoApellidoInput) segundoApellidoInput.value = dataEmpleado.segundo_apellido || '';
+                          if(fechaNacimientoInput) fechaNacimientoInput.value = dataEmpleado.fecha_nacimiento || '';
+                          if(sexoSelect) sexoSelect.value = dataEmpleado.sexo || '';
+                          if(fechaIngresoInput) fechaIngresoInput.value = dataEmpleado.fecha_ingreso_empresa || '';
+                          if(tipoContratoSelect) tipoContratoSelect.value = dataEmpleado.tipo_contrato_codigo || '';
+                          if(cargoSelect) cargoSelect.value = dataEmpleado.cargo_codigo || '';
+                          if(areaSelect) areaSelect.value = dataEmpleado.area_codigo || '';
+                          if(procesoSelect) procesoSelect.value = dataEmpleado.proceso_codigo || '';
+                          if(turnoTrabajoSelect) turnoTrabajoSelect.value = dataEmpleado.turno_trabajo_codigo || '';
+                          if(epsInput) epsInput.value = dataEmpleado.eps || '';
+                          if(afpInput) afpInput.value = dataEmpleado.afp || '';
+                          if(ciudadInput) ciudadInput.value = dataEmpleado.ciudad || '';
+
+                          bloquearCamposEmpleado(false);
+                           [sexoSelect, tipoContratoSelect, cargoSelect, areaSelect, procesoSelect, turnoTrabajoSelect].forEach(sel => { if(sel) sel.disabled = false; });
+                          habilitarCamposAusentismo(true);
+                      } else {
+                          mostrarMensaje(dataEmpleado.error || "Empleado no encontrado.", "error");
+                          bloquearCamposEmpleado(true);
+                          habilitarCamposAusentismo(false);
+                      }
+                  })
+                  .catch(error => {
+                      ocultarMensaje();
+                      mostrarMensaje(`Error al buscar empleado: ${error.message}`, 'error');
+                      bloquearCamposEmpleado(true);
+                      habilitarCamposAusentismo(false);
+                  });
+          } else {
+               bloquearCamposEmpleado(true);
+               habilitarCamposAusentismo(false);
+          }
+      });
+    }
+
+    if (form) {
+      form.addEventListener('submit', function(event) {
+          event.preventDefault();
+          // Validar el último paso del wizard antes de enviar
+          if (currentStep === totalSteps && !validateStep(currentStep)) {
+              mostrarMensaje('Por favor, completa todos los campos obligatorios del último paso antes de enviar.', 'error');
+              return;
+          }
+          ocultarMensaje();
+          const formData = new FormData(form);
+          if(document.getElementById('codigo')) formData.set('codigo', document.getElementById('codigo').value);
+
+          const submitButton = document.getElementById('submitButton');
+          if (submitButton) submitButton.disabled = true;
+
+          mostrarMensaje("Guardando ausentismo...", "info");
+          fetch(form.action, { method: 'POST', body: formData })
+          .then(response => {
+              const contentType = response.headers.get("content-type");
+              if (contentType && contentType.indexOf("application/json") !== -1) {
+                  return response.json().then(data => ({ ok: response.ok, status: response.status, data: data }));
+              } else { 
+                  return response.text().then(text => { throw new Error("Respuesta no es JSON: " + text); });
+              }
+          })
+          .then(result => {
+              ocultarMensaje();
+              if (result.ok && result.data.mensaje) {
+                  mostrarMensaje(result.data.mensaje, 'success');
+                  limpiarCampos(camposAusentismoLimpiar);
+                  // Opcional: Resetear el wizard al primer paso o limpiar campos del empleado también
+                  // currentStep = 1;
+                  // showStep(currentStep);
+                  // limpiarCampos(camposEmpleadoBloqueados); // y el input de documento_identidad
+                  // bloquearCamposEmpleado(true);
+                  // habilitarCamposAusentismo(false);
+              } else { throw new Error(result.data.error || `Error ${result.status}`); }
+          })
+          .catch(error => {
+              ocultarMensaje();
+              mostrarMensaje(`Error al guardar: ${error.message}`, 'error');
+          })
+          .finally(() => {
+              if (submitButton) submitButton.disabled = false;
+          });
+      });
+    }
+
+    // --- INICIO SCRIPT DEL WIZARD ---
+    let currentStep = 1;
+    const totalSteps = 3; // Tres pasos definidos en el HTML
+    const wizardSteps = document.querySelectorAll(".wizard-step"); // Cambiado a wizardSteps para evitar conflicto con tu var 'steps'
+    const progressBar = document.getElementById("progressBar");
+
+    function showStep(stepNumber) {
+        wizardSteps.forEach((step, index) => {
+            step.classList.toggle("active", (index + 1) === stepNumber);
+        });
+        if (typeof updateProgressBar === "function") updateProgressBar();
+    }
+
+    function updateProgressBar() {
+        if (!progressBar) return;
+        const progressPercentage = ((currentStep - 1) / (totalSteps - 1)) * 100;
+        progressBar.style.width = `${progressPercentage}%`;
+        progressBar.textContent = `Paso ${currentStep} de ${totalSteps}`;
+        if (currentStep === totalSteps) {
+            progressBar.textContent = `Paso ${currentStep} de ${totalSteps} - Listo para enviar`;
+        }
+    }
+
+    function validateStep(stepNumber) {
+        const currentStepElement = document.getElementById(`step${stepNumber}`);
+        if (!currentStepElement) return false;
+
+        const inputs = currentStepElement.querySelectorAll("input[required]:not([readonly]):not(:disabled), select[required]:not(:disabled), textarea[required]:not([readonly]):not(:disabled)");
+        let isValid = true;
+        inputs.forEach(input => {
+            input.style.borderColor = ""; // Resetear borde
+            let fieldValue = input.value.trim();
+            
+            if (input.tagName === 'SELECT' && input.required && fieldValue === "" && input.options[0] && input.options[0].disabled && input.options[0].value === "") {
+                isValid = false;
+                input.style.borderColor = "red";
+            } else if (input.required && fieldValue === "") {
+                isValid = false;
+                input.style.borderColor = "red";
+            }
+        });
+        if (!isValid) {
+            // Usar tu función mostrarMensaje en lugar de alert
+            mostrarMensaje("Por favor, completa todos los campos obligatorios del paso actual.", "error");
+        } else {
+            ocultarMensaje(); // Ocultar si todo es válido en este paso
+        }
+        return isValid;
+    }
+
+    window.nextPrev = function(n) { // Hacerla global para los onclick
+        // Ocultar mensajes de validación previos al intentar navegar
+        ocultarMensaje();
+
+        // Lógica específica para el primer paso donde se busca el empleado
+        if (currentStep === 1 && n === 1) { // Al intentar salir del paso 1
+            const docIdInput = document.getElementById('documento_identidad');
+            const primerNombreInput = document.getElementById('primer_nombre');
+            if (!docIdInput || docIdInput.value.trim() === "") {
+                 mostrarMensaje("Debes ingresar un número de documento.", "error");
+                 return false;
+            }
+            // Verificar si los datos del empleado se cargaron (ej. si primer_nombre tiene valor)
+            // Esto asume que el 'blur' y fetch del empleado ya ocurrieron.
+            // Si el usuario no sale del campo documento_identidad, no se cargan los datos.
+            // Se podría forzar el blur o una validación más explícita aquí.
+            if (!primerNombreInput || primerNombreInput.value.trim() === "") {
+                mostrarMensaje("Debes buscar y cargar los datos del empleado antes de continuar.", "error");
+                // Opcional: forzar el evento blur para que se ejecute la búsqueda si aún no se ha hecho
+                // docIdInput.dispatchEvent(new Event('blur'));
+                return false;
+            }
+        }
+
+
+        if (n === 1 && currentStep < totalSteps) { // Si es "Siguiente"
+            if (!validateStep(currentStep)) {
+                return false; 
+            }
+        }
+        
+        const nextStepNumber = currentStep + n;
+        if (nextStepNumber > 0 && nextStepNumber <= totalSteps) {
+            currentStep = nextStepNumber;
+            showStep(currentStep);
+        }
+    }
+    
+    // Inicializar el wizard
+    if (wizardSteps.length > 0) { // Asegurarse que existan los pasos del wizard
+        showStep(currentStep);
+    }
+    // --- FIN SCRIPT DEL WIZARD ---
+}); // Fin de DOMContentLoaded
+    </script>
+{% endblock %}

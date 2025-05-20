@@ -1,0 +1,92 @@
+{% extends "layout.html" %}
+
+{% block title %}Registro de Usuario{% endblock %}
+
+{% block content %}
+
+    <div class="login-form-logo-container">
+            {# Asegúrate que la ruta a tu logo 'G' grande sea correcta, actualmente es logo.png #}
+            <img src="https://res.cloudinary.com/drwenzp1j/image/upload/t_Profile/v1747175222/logo_pkbrvf.png" alt="Logo" class="login-logo">
+    </div>
+
+    <h2>Registro Usuario</h2>
+    
+    <form action="{{ url_for('usuario.guardar_usuario') }}" method="POST">
+            
+        <div class="form-group-custom-1">
+            <label for="tipo_documento">Tipo de Documento:</label>
+            <select class="form-select" aria-label="Default select example" name="tipo_documento" id="tipo_documento">
+                {% for tipo_documento in tipos_documentos %}
+                    <option value="{{ tipo_documento }}">{{ tipo_documento }}</option>
+                {% endfor %}
+            </select><br>
+        </div>
+
+         <div class="form-group-custom-1">
+            <label for="doc_id">Número de Documento de Identidad:</label>
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" placeholder="Digita tu número de documento de identidad" aria-label="doc_id" aria-describedby="doc_id" name="doc_id" id="doc_id" required>
+            </div>            
+        </div>
+
+        <div class="form-group-custom-1">
+            <label for="doc_id">Primer nombre:</label>
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" placeholder="Digita tu primer nombre" aria-label="primer_nombre" aria-describedby="primer_nombre" name="primer_nombre" id="primer_nombre" required>
+            </div>     
+        </div>      
+
+        <div class="form-group-custom-1">
+            <label for="segundo_nombre">Segundo Nombre:</label>
+            <div class="input-group mb-3">                
+                <input type="text" class="form-control" placeholder="Digita tu segundo nombre" aria-label="segundo_nombre" aria-describedby="segundo_nombre" name="segundo_nombre" id="segundo_nombre" >
+                </div>
+        </div>
+
+         <div class="form-group-custom-1">
+            <label for="primer_apellido">Primer Apellido:</label>
+            <div class="input-group mb-3">  
+                <input type="text" class="form-control" placeholder="Digita tu primer apellido" aria-label="primer_apellido" aria-describedby="primer_apellido" name="primer_apellido" id="primer_apellido" required>
+            </div>
+        </div>
+
+        <div class="form-group-custom-1">
+            <label for="segundo_apellido">Segundo Apellido:</label>
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" placeholder="Digita tu segundo apellido" aria-label="segundo_apellido" aria-describedby="segundo_apellido"name="segundo_apellido" id="segundo_apellido" >
+            </div>
+        </div>
+
+         <div class="form-group-custom-1">
+            <label for="password">Email:</label>
+            <div class="input-group mb-3">
+            <input type="email" class="form-control" placeholder="Digita tu email" aria-label="email" aria-describedby="email" name="email" id="email"required>
+            </div>
+        </div>
+
+        <div class="form-group-custom-1">
+            <label for="password">Password:</label>
+            <div class="input-group mb-3">
+            <input type="password" class="form-control" placeholder="Digita tu password" aria-label="password" aria-describedby="password" name="password" id="password"required>
+            </div>
+        </div>
+
+        <div class="form-group-custom-1">
+            <label for="fecha_creacion">Fecha de Creación de la Cuenta:</label>
+            <div class="input-group mb-3">
+            <input type="date" class="form-control" placeholder="Digita tu fecha de creacion" aria-label="fecha_creacion" aria-describedby="fecha_creacion"name="fecha_creacion" id="fecha_creacion" required>
+            </div>
+        </div>
+
+        <div class="form-group-custom-1">
+            <label hidden for="fecha_actualizacion">Fecha de Actualización de la Cuenta:</label>
+            <div class="input-group mb-3">
+            <input hidden type="date" class="form-control" placeholder="Digita tu fecha de actualizacion" aria-label="fecha_actualizacion" aria-describedby="fecha_actualizacion"name="fecha_actualizacion" id="fecha_actualizacion" >
+            </div>
+        </div>
+
+        <button type="submit" class="btn-login-custom">Guardar</button>
+        
+    </form>
+{% endblock %} {% block scripts %}
+    {% endblock %}

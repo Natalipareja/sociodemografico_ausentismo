@@ -1,0 +1,100 @@
+{% extends "nav.html" %}
+
+{% block title %}Consolidado Información Sociodemográfica{% endblock %} {# Título más específico #}
+
+{% block head_extra %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_consolidado_sociodemografico.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2>Consolidado de Información Sociodemográfica</h2>
+    
+    <div class="table-responsive-container">        
+        <table class="table table-striped table-hover">
+            <thead> {# Añadido el encabezado de la tabla #}
+                <tr>
+                    <th>#</th>
+                    <th>Usuario</th>
+                    <th>Tipo Doc.</th>
+                    <th>Documento</th>
+                    <th>Primer Nombre</th>
+                    <th>Segundo Nombre</th>
+                    <th>Primer Apellido</th>
+                    <th>Segundo Apellido</th>
+                    <th>Fecha Nacimiento</th>
+                    <th>Sexo</th>
+                    <th>Nivel Escolaridad</th>
+                    <th>Estado Civil</th>
+                    <th>Comp. Familiar</th>
+                    <th>Hijos</th>
+                    <th>Cabeza Hogar</th>
+                    <th>Departamento</th>
+                    <th>Ciudad</th>
+                    <th>Dirección</th>
+                    <th>Tipo Vivienda</th>
+                    <th>Estrato</th>
+                    <th>Fecha Ingreso</th>
+                    <th>Tipo Contrato</th>
+                    <th>Cargo</th>
+                    <th>Área</th>
+                    <th>Proceso</th>
+                    <th>Turno</th>
+                    <th>Ingresos</th>
+                    <th>EPS</th>
+                    <th>AFP</th>
+                    <th>Acciones</th> {# Columna para futuras acciones #}
+                </tr>
+            </thead>
+            <tbody id="tablaSociodemograficaBody">
+                {# Verificar si hay registros para mostrar #}
+                {% if registros_para_tabla %}
+                    {% for registro in registros_para_tabla %}
+                    <tr>
+                        <td>{{ loop.index }}</td> {# Número de fila automático de Jinja2 #}
+                        <td>{{ registro.usuario if registro.usuario is not none else '' }}</td>
+                        <td>{{ registro.tipo_documento if registro.tipo_documento is not none else '' }}</td>
+                        <td>{{ registro.documento_identidad if registro.documento_identidad is not none else '' }}</td>
+                        <td>{{ registro.primer_nombre if registro.primer_nombre is not none else '' }}</td>
+                        <td>{{ registro.segundo_nombre if registro.segundo_nombre is not none else '' }}</td>
+                        <td>{{ registro.primer_apellido if registro.primer_apellido is not none else '' }}</td>
+                        <td>{{ registro.segundo_apellido if registro.segundo_apellido is not none else '' }}</td>
+                        <td>{{ registro.fecha_nacimiento_formateada if registro.fecha_nacimiento_formateada is not none else (registro.fecha_nacimiento if registro.fecha_nacimiento is not none else '') }}</td>
+                        <td>{{ registro.sexo if registro.sexo is not none else '' }}</td>
+                        <td>{{ registro.nivel_escolaridad if registro.nivel_escolaridad is not none else '' }}</td>
+                        <td>{{ registro.estado_civil if registro.estado_civil is not none else '' }}</td>
+                        <td>{{ registro.composicion_familiar if registro.composicion_familiar is not none else '' }}</td>
+                        <td>{{ registro.hijos if registro.hijos is not none else '' }}</td>
+                        <td>{{ registro.cabeza_hogar if registro.cabeza_hogar is not none else '' }}</td>
+                        <td>{{ registro.nombre_departamento if registro.nombre_departamento is not none else (registro.departamento if registro.departamento is not none else '') }}</td>
+                        <td>{{ registro.nombre_ciudad if registro.nombre_ciudad is not none else (registro.ciudad if registro.ciudad is not none else '') }}</td>
+                        <td>{{ registro.direccion if registro.direccion is not none else '' }}</td>
+                        <td>{{ registro.tipo_vivienda if registro.tipo_vivienda is not none else '' }}</td>
+                        <td>{{ registro.estrato if registro.estrato is not none else '' }}</td>
+                        <td>{{ registro.fecha_ingreso_formateada if registro.fecha_ingreso_formateada is not none else (registro.fecha_ingreso_empresa if registro.fecha_ingreso_empresa is not none else '') }}</td>
+                        <td>{{ registro.tipo_contrato if registro.tipo_contrato is not none else '' }}</td>
+                        <td>{{ registro.nombre_cargo if registro.nombre_cargo is not none else (registro.cargo if registro.cargo is not none else '') }}</td>
+                        <td>{{ registro.nombre_area if registro.nombre_area is not none else (registro.area if registro.area is not none else '') }}</td>
+                        <td>{{ registro.nombre_proceso if registro.nombre_proceso is not none else (registro.proceso if registro.proceso is not none else '') }}</td>
+                        <td>{{ registro.turno_trabajo if registro.turno_trabajo is not none else '' }}</td>
+                        <td>{{ registro.ingresos if registro.ingresos is not none else '' }}</td>
+                        <td>{{ registro.eps if registro.eps is not none else '' }}</td>
+                        <td>{{ registro.afp if registro.afp is not none else '' }}</td>
+                        <td>
+                            {# Aquí puedes añadir botones de acción si los necesitas en el futuro #}
+                            {# <button class="btn btn-sm btn-primary">Editar</button> #}
+                            {# <button class="btn btn-sm btn-danger">Eliminar</button> #}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    {# Esta fila se mostrará si no hay registros #}
+                    <tr id="noDataRow">
+                        <td colspan="30" class="text-center">No hay registros sociodemográficos para mostrar.</td> {# Ajustado el colspan #}
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

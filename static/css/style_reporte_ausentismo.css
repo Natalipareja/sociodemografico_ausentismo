@@ -1,0 +1,225 @@
+
+/* Importar fuentes */
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+/* -------------------------------------------------------------------------- */
+/* VARIABLES CSS GLOBALES                                                     */
+/* -------------------------------------------------------------------------- */
+:root {
+    --primary_color: #FAFEFF;
+    --second_color: #D6D6D6;
+    --third_color: #1A3863;
+    --fourth_color: #94DBED;
+    --fifth_color: #5c94b4;
+    --image-bg-color: #F8F9FA;
+    
+    --primary_font: "Poppins", sans-serif;
+    --second_font: "Comfortaa", sans-serif;
+
+    --big_font_weight: 700;
+    --medium_font_weight: 500;
+    --normal_font_weight: 400;
+    --light_font_weight: 300;
+    --thin_font_weight: 100;
+
+}
+
+body{
+    background: var(--second_color);
+}
+
+h2,h3{
+    text-align: center;
+    color: var(--third_color);
+}
+/* --- Estilos Generales del Formulario (si los tienes, ajústalos) --- */
+#ausentismo-form{
+    /* max-width: 900px; /* Ajusta según necesites */
+    /* margin: 20px auto; */
+    /* padding: 20px; */
+    /* background-color: #f9f9f9; */
+    /* border: 1px solid #ddd; */
+    /* border-radius: 8px; */
+}
+
+#ausentismo-form h2, #ausentismo-form h3 {
+    color: #333;
+    margin-bottom: 15px;
+}
+
+/* --- Estilos para Mensajes --- */
+.message {
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+.message.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+.message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+.message.info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+
+/* --- Estilos para el Wizard --- */
+#progressBarContainer {
+    width: 100%;
+    background-color: #e9ecef;
+    border-radius: .25rem;
+    margin-bottom: 25px;
+    overflow: hidden;
+}
+
+#progressBar {
+    width: 0%; /* Se actualizará con JavaScript */
+    height: 25px;
+    background-color: var(--fourth_color); /* Azul primario o el color de tu tema */
+    text-align: center;
+    line-height: 25px;
+    color: var(--third_color);
+    font-weight: bold;
+    transition: width 0.4s ease-in-out;
+}
+
+.wizard-step {
+    display: none; /* Ocultar todos los pasos por defecto */
+    padding: 20px;
+    border: 1px solid #ddd; /* Opcional, si quieres un borde alrededor del paso */
+    border-radius: 5px;
+    margin-bottom: 20px;
+    background-color: #fff; /* Fondo blanco para el contenido del paso */
+}
+
+.wizard-step.active {
+    display: block; /* Mostrar solo el paso activo */
+}
+
+.wizard-step h3 {
+    margin-top: 0;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+/* --- Estilos para las Columnas Dentro de Cada Paso --- */
+.step-content-columns {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 20px; /* Espacio entre las columnas */
+    margin-bottom: 20px; /* Espacio antes de los botones del wizard */
+}
+
+.form-column {
+    flex: 1; /* Cada columna intenta ocupar el mismo espacio */
+    min-width: 300px; /* Ancho mínimo antes de que se envuelvan */
+}
+
+.form-column label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: normal; /* O bold si prefieres */
+}
+
+.form-column input[type="text"],
+.form-column input[type="date"],
+.form-column select,
+.form-column textarea {
+    width: 100%;
+    padding: 8px 10px;
+    margin-bottom: 10px; /* Espacio entre campos */
+    box-sizing: border-box;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    font-size: 1rem;
+}
+
+.form-column input[readonly],
+.form-column select:disabled, /* Para los selects deshabilitados de datos empleado */
+.form-column textarea[readonly] {
+    background-color: #e9ecef; /* Fondo grisáceo para campos no editables */
+    cursor: not-allowed;
+}
+.form-column select:disabled {
+    color: #6c757d; /* Color de texto para selects deshabilitados */
+}
+
+/* Estilo para el grupo de input y botón CIE-10 */
+.input-group {
+    display: flex;
+    align-items: center; /* Alinea verticalmente el input y el botón */
+    margin-bottom: 10px; /* Igual que otros campos */
+}
+.input-group input[type="text"] {
+    flex-grow: 1; /* El input toma el espacio disponible */
+    margin-bottom: 0; /* Quitar margen inferior del input dentro del grupo */
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+.input-group .btn-search-cie10 {
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-left: none; /* Para que se una visualmente al input */
+    background-color: #e9ecef;
+    cursor: pointer;
+    border-top-right-radius: .25rem;
+    border-bottom-right-radius: .25rem;
+    font-size: 1rem;
+    line-height: 1.5; /* Para alinear con el input height */
+}
+.input-group .btn-search-cie10:hover {
+    background-color: #d8dde2;
+}
+
+
+/* --- Estilos para los Botones del Wizard --- */
+.wizard-buttons {
+    margin-right: 20px; /* Más espacio antes de los botones */
+    margin-bottom: 20px;
+    text-align: right;
+    padding-top: 10px;
+    /* border-top: 1px solid #eee; /* Opcional: línea separadora */
+}
+
+.wizard-buttons button {
+    padding: 10px 20px;
+    margin-left: 10px;
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+.wizard-buttons .btn-prev {
+    background-color: #6c757d; /* Gris secundario */
+    color: white;
+}
+.wizard-buttons .btn-prev:hover {
+    background-color: #5a6268;
+}
+
+.wizard-buttons .btn-next,
+.wizard-buttons .btn-submit { /* btn-submit es el ID del botón de envío final */
+    background-color: var(--fourth_color); /* Azul primario */
+    color: var(--third_color);
+    
+}
+.wizard-buttons .btn-next:hover,
+.wizard-buttons .btn-submit:hover {
+    background-color: var(--fifth_color);
+}
+.wizard-buttons button:disabled { /* Para el botón de submit durante el envío */
+    background-color: #cccccc;
+    cursor: not-allowed;
+}

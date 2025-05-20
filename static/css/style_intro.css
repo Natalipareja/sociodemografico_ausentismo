@@ -1,0 +1,176 @@
+/* css/style_intro.css */
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+:root {
+    /* Colores Principales */
+    --primary-color: #FAFEFF;   /* Blanco casi puro */
+    --secondary-color: #E9ECEF; /* Gris claro (reemplaza D6D6D6 por algo más suave de Bootstrap) */
+    --tertiary-color: #1A3863;  /* Azul oscuro principal */
+    --accent-color-light: #94DBED; /* Azul claro acento */
+    --accent-color-dark: #5c94b4;  /* Azul medio acento */
+
+    /* Fuentes */
+    --font-primary: "Poppins", sans-serif;
+    --font-secondary: "Comfortaa", sans-serif;
+
+    /* Pesos de Fuente */
+    --font-weight-bold: 700;
+    --font-weight-medium: 500;
+    --font-weight-normal: 400; /* Ajustado de 300 a 400 para Poppins normal */
+    --font-weight-light: 300;
+
+    /* Variables semánticas (para referencia o uso en otros componentes) */
+    --text-color-on-dark: var(--primary-color);
+    --text-color-on-light: var(--tertiary-color);
+    --background-body: var(--secondary-color);
+}
+
+/* Los estilos del body se aplican inline en nav.html para asegurar el layout full-height */
+/* Si necesitas anular algo de Bootstrap o de nav.css para el body EN ESTA PÁGINA ESPECÍFICA, puedes hacerlo aquí */
+/* Por ejemplo: */
+/* body {
+    background-color: var(--background-body) !important; /* Solo si es necesario anular algo con más especificidad */
+/* } */
+
+
+/* --- Estilos del Carrusel --- */
+#carouselExampleDark {
+    /* AJUSTA ESTA ALTURA SEGÚN NECESITES PARA QUE TODO QUEPA EN PANTALLA */
+    /* Prueba valores como 70vh, 72vh, 68vh, etc. */
+    height: 70vh; /* Ejemplo: 70% de la altura de la ventana */
+    /* max-height: 700px; /* Alternativa: un máximo en píxeles */
+    
+    width: 100%; /* Ocupa el ancho del contenedor padre (que es el bloque de contenido) */
+    background-color: var(--tertiary-color); /* Fondo si las imágenes no cargan o son transparentes */
+    /* margin-top: auto; */ /* Descomentar estas dos líneas si quieres centrar verticalmente el carrusel */
+    /* margin-bottom: auto; */ /* en caso de que 'main' sea más alto que el carrusel */
+}
+
+.carousel-inner {
+    height: 100%; /* Ocupa el 100% de la altura de #carouselExampleDark */
+    border-radius: 0; /* Sin bordes redondeados para un look más integrado si es full-width */
+    overflow: hidden; /* Importante para que object-fit no desborde */
+}
+
+.carousel-item {
+    height: 100%; /* Ocupa el 100% de la altura de .carousel-inner */
+}
+
+.carousel-item img {
+    width: 100%; /* Ocupa el 100% del ancho de .carousel-item */
+    height: 100%; /* Ocupa el 100% de la altura de .carousel-item */
+    object-fit: cover; /* Cubre el espacio disponible, puede recortar la imagen */
+    /* object-position: center center; */ /* Puedes ajustar esto si el recorte no es el ideal (ej. 'center top') */
+    filter: brightness(0.7) contrast(1.1); /* Oscurece un poco las imágenes para que el texto resalte */
+}
+
+.carousel-caption {
+    background-color: rgba(26, 56, 99, 0.7); /* Azul oscuro semi-transparente (var(--tertiary-color) con alfa) */
+    color: var(--primary-color); /* Texto blanco por defecto para el caption */
+    border-radius: 6px;
+    padding: 15px 25px;
+    bottom: 6%;       /* Posicionamiento desde abajo */
+    left: 5%;
+    right: 5%;
+    text-align: left;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.35); /* Sombra sutil */
+}
+
+.carousel-caption h5 {
+    font-family: var(--font-secondary);
+    font-weight: var(--font-weight-bold);
+    font-size: clamp(1.4rem, 2.8vw, 2.1rem); /* Tamaño de fuente adaptable */
+    margin-bottom: 0.6rem;
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.5); /* Sombra de texto */
+    color: var(--primary-color); /* Asegura que el h5 sea blanco (o el color deseado) */
+}
+
+/* Estilos para los títulos del carrusel cuando son enlaces */
+/* Estilos para los títulos del carrusel cuando son enlaces */
+.carousel-caption h5 a.carousel-title-link {
+    color: inherit; /* Hereda el color del h5 padre (debería ser --primary-color) */
+    text-decoration: none; /* Quita el subrayado */
+    transition: opacity 0.2s ease-in-out, text-shadow 0.2s ease-in-out, color 0.2s ease-in-out; /* Añade 'color' a la transición */
+}
+
+.carousel-caption h5 a.carousel-title-link:hover,
+.carousel-caption h5 a.carousel-title-link:focus {
+    color: var(--accent-color-light); /* ¡AQUÍ ESTÁ EL CAMBIO! */
+    text-decoration: none; /* Puedes cambiar a 'underline' si quieres subrayado en hover */
+    opacity: 1; /* Puedes ajustar la opacidad o quitarla si el cambio de color es suficiente */
+    /* text-shadow: 1px 1px 6px rgba(0,0,0,0.7); */ /* La sombra puede ser demasiado con el cambio de color, opcional */
+}
+
+.carousel-caption p {
+    font-family: var(--font-primary);
+    font-weight: var(--font-weight-light);
+    font-size: clamp(0.85rem, 1.4vw, 1.05rem); /* Tamaño de fuente adaptable */
+    margin-bottom: 0;
+    line-height: 1.5;
+}
+
+/* --- Estilos de Indicadores y Controles del Carrusel --- */
+.carousel-indicators {
+    bottom: 10px; /* Ligeramente más arriba que el valor por defecto */
+}
+
+.carousel-indicators [data-bs-target] {
+    background-color: rgba(250, 254, 255, 0.35); /* var(--primary-color) con alfa */
+    border: 1px solid rgba(26, 56, 99, 0.4); /* var(--tertiary-color) con alfa */
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin: 0 5px; /* Espaciado */
+    opacity: 0.75;
+    transition: opacity 0.3s ease, background-color 0.3s ease, transform 0.3s ease;
+}
+
+.carousel-indicators [data-bs-target]:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.carousel-indicators .active {
+    background-color: var(--accent-color-light);
+    opacity: 1;
+    border-color: var(--primary-color);
+    transform: scale(1.15);
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+    width: 6%; /* Ligeramente más anchos para mejor accesibilidad en táctil */
+    opacity: 0.6; /* Un poco transparentes hasta el hover */
+    transition: opacity 0.3s ease, background-color 0.3s ease;
+}
+.carousel-control-prev:hover,
+.carousel-control-next:hover {
+    opacity: 0.9;
+    background-color: rgba(0,0,0,0.05); /* Sutil hover sobre el control */
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    background-color: rgba(26, 56, 99, 0.45); /* var(--tertiary-color) con alfa */
+    border-radius: 50%;
+    padding: 1.1em; /* Ajusta el padding para el tamaño del ícono interno */
+    background-size: 55% 55%; /* Hace el ícono SVG interno un poco más grande */
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.25));
+}
+
+/* Iconos de control blancos para carousel-dark (ya que el fondo de los íconos es oscuro) */
+.carousel.carousel-dark .carousel-control-prev-icon {
+   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23FAFEFF'%3e%3cpath d='M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z'/%3e%3c/svg%3e");
+}
+
+.carousel.carousel-dark .carousel-control-next-icon {
+   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23FAFEFF'%3e%3cpath d='M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+}
+
+p{
+    color: var(--primary-color);
+}
+
+body{
+    background: var(--secondary-color)!important;
+}

@@ -1,0 +1,230 @@
+/* Importar fuentes */
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+/* -------------------------------------------------------------------------- */
+/* VARIABLES CSS GLOBALES                                                     */
+/* -------------------------------------------------------------------------- */
+:root {
+    --primary_color: #FAFEFF;
+    --second_color: #D6D6D6;
+    --third_color: #1A3863;
+    --fourth_color: #94DBED;
+    --fifth_color: #5c94b4;
+    --image-bg-color: #F8F9FA;
+    
+    --primary_font: "Poppins", sans-serif;
+    --second_font: "Comfortaa", sans-serif;
+
+    --big_font_weight: 700;
+    --medium_font_weight: 500;
+    --normal_font_weight: 400;
+    --light_font_weight: 300;
+    --thin_font_weight: 100;
+
+
+}
+
+body{
+    background: var(--second_color);
+    font-family: var(--second_font);
+}
+
+h2, h3{
+    text-align: center;
+    font-family: var(--primary_font);
+}
+/* Estilos para el Formulario Wizard */
+
+/* Contenedor principal del wizard (opcional, si quieres un contenedor general) */
+/* #sociodemographicForm { */
+/* max-width: 700px; /* O el ancho que prefieras */
+/* margin: 20px auto; /* Centrar el formulario */
+/* padding: 20px; */
+/* background-color: #f9f9f9; */
+/* border-radius: 8px; */
+/* box-shadow: 0 0 10px rgba(0,0,0,0.1); */
+/* } */
+
+/* Estilo para cada paso del wizard */
+.wizard-step {
+    display: none; /* Ocultar todos los pasos por defecto */
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    background-color: #fff; /* Fondo blanco para cada paso */
+}
+
+/* Estilo para el paso activo (visible) */
+.wizard-step.active {
+    display: block;
+}
+
+/* Títulos dentro de cada paso */
+.wizard-step h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+/* Estilo para los contenedores de botones de navegación */
+.wizard-buttons {
+    margin-right: 20px; /* Más espacio antes de los botones */
+    margin-bottom: 20px;
+    text-align: right; /* Alinea los botones a la derecha */
+    padding-top: 0px;
+    /* border-top: 1px solid #eee; Línea separadora sutil */
+}
+
+/* Estilo general para los botones del wizard */
+.wizard-buttons button {
+    padding: 10px 20px; /* Un poco más de padding */
+    margin-left: 10px;
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+/* Estilo específico para el botón "Anterior" */
+.wizard-buttons button[onclick*="nextPrev(-1)"] {
+    background-color: #f0f0f0; /* Un color más suave para "Anterior" */
+    color: #333;
+    border: 1px solid #ccc;
+}
+
+.wizard-buttons button[onclick*="nextPrev(-1)"]:hover {
+    background-color: #e0e0e0;
+}
+
+/* Estilo específico para el botón "Siguiente" y "Guardar" */
+.wizard-buttons button[onclick*="nextPrev(1)"],
+.wizard-buttons button[type="submit"] {
+    background-color: var(--fourth_color); /* Color primario (Bootstrap-like) */
+    color: var(--third_color);
+}
+
+.wizard-buttons button[onclick*="nextPrev(1)"]:hover,
+.wizard-buttons button[type="submit"]:hover {
+    background-color: var(--fifth_color); /* Oscurecer al pasar el mouse */
+}
+
+/* Estilo para el botón de submit cuando está deshabilitado */
+.wizard-buttons button[type="submit"]:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+
+/* Barra de Progreso */
+#progressBarContainer {
+    width: 100%;
+    background-color: #e9ecef; /* Un gris más claro para el fondo */
+    border-radius: .25rem; /* Bordes redondeados suaves */
+    margin-bottom: 25px;
+    overflow: hidden; /* Para que la barra interna no se salga de los bordes redondeados */
+}
+
+#progressBar {
+    width: 0%; /* Se actualizará con JavaScript */
+    height: 25px; /* Un poco más alta */
+    background-color: var(--fourth_color); /* Un verde (Bootstrap success-like) */
+    text-align: center;
+    line-height: 25px; /* Centrar verticalmente el texto */
+    color: var(--third_color);
+    font-weight: bold;
+    /* No necesita border-radius aquí si progressBarContainer tiene overflow:hidden */
+    transition: width 0.4s ease-in-out; /* Transición más suave */
+}
+
+/* Estilos para los campos del formulario (ejemplo básico) */
+/* Puedes reutilizar los estilos que ya tengas o añadir nuevos */
+#sociodemographicForm label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+#sociodemographicForm input[type="text"],
+#sociodemographicForm input[type="date"],
+#sociodemographicForm input[type="email"], /* Si tuvieras emails */
+#sociodemographicForm select,
+#sociodemographicForm textarea {
+    width: calc(100% - 22px); /* Ajustar al padding y borde */
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box; /* Importante para que el padding no afecte el ancho total */
+    font-size: 1em;
+}
+
+#sociodemographicForm input[type="text"][readonly] {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+}
+
+#sociodemographicForm textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+/* Estilo para campos inválidos (agregado por JavaScript) */
+#sociodemographicForm input.invalid,
+#sociodemographicForm select.invalid,
+#sociodemographicForm textarea.invalid {
+    border-color: red !important; /* Resaltar campos inválidos */
+}
+
+/* Mejorar la apariencia de los mensajes de error (si los añades con JS) */
+.error-message {
+    color: red;
+    font-size: 0.85em;
+    margin-top: -10px;
+    margin-bottom: 10px;
+    display: block;
+}
+
+/* --- Estilos para las columnas dentro de cada paso del wizard --- */
+.step-content-columns {
+    display: flex; /* Activa Flexbox */
+    flex-direction: row; /* Alinea los hijos (columnas) en una fila */
+    flex-wrap: wrap; /* Permite que las columnas se envuelvan en pantallas pequeñas si es necesario */
+    gap: 20px; /* Espacio horizontal entre las columnas .form-column */
+    margin-bottom: 20px; /* Espacio antes de los botones del wizard-step */
+}
+
+.form-column {
+    flex: 1; /* Hace que cada columna intente ocupar el mismo espacio disponible */
+    min-width: 280px; /* Un ancho mínimo para cada columna antes de que se envuelvan (si flex-wrap está activo) */
+                      /* Ajusta este valor según tus necesidades y el ancho total del formulario */
+}
+
+/* Opcional: Para asegurar que los elementos de formulario dentro de las columnas ocupen el ancho completo de su columna */
+.form-column label {
+    display: block; /* Hace que la etiqueta ocupe su propia línea */
+    margin-bottom: 5px; /* Espacio entre la etiqueta y el campo */
+}
+
+.form-column input[type="text"],
+.form-column input[type="date"],
+.form-column select,
+.form-column textarea {
+    width: 100%; /* Ocupa todo el ancho disponible de .form-column */
+    padding: 8px; /* Ajusta el padding según tu diseño */
+    margin-bottom: 10px; /* Espacio debajo de cada campo */
+    box-sizing: border-box; /* Importante: el padding y borde no se sumarán al width total */
+    border: 1px solid #ccc; /* Ejemplo de borde */
+    border-radius: 4px; /* Ejemplo de bordes redondeados */
+}
+
+/* Si decides eliminar los <br> y manejar el espaciado solo con CSS: */
+/*
+.form-column br {
+    display: none;
+}
+*/

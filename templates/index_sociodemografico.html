@@ -1,0 +1,384 @@
+{% extends "nav.html" %}
+
+{% block title %}Información Sociodemográfica{% endblock %}
+
+{% block head_extra %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_infosociodemografico.css') }}">
+{% endblock %}
+
+{% block content %}
+    <h2>Información Sociodemográfica</h2>
+    
+    <form action="{{ url_for('sociodemografico.guardar_info') }}" method="POST" id="sociodemographicForm"
+          data-url-ciudades="{{ url_for('sociodemografico.obtener_ciudades') }}"
+          data-url-area-proceso="{{ url_for('sociodemografico.obtener_area_proceso') }}">
+
+        <div id="progressBarContainer">
+            <div id="progressBar">Paso 1 de 4</div>
+        </div>
+
+        <div class="wizard-step active" id="step1">
+            <h3>Paso 1: Información Personal Básica</h3>
+
+            <div class="step-content-columns">
+                <div class="form-column">
+                    <label for="usuario">Usuario:</label>
+                    <input type="text" name="usuario" value="39457318" required><br>
+
+                    <label for="tipo_documento">Tipo de Documento:</label>
+                    <select name="tipo_documento" id="tipo_documento">
+                        {% for tipo_documento_item in tipos_documentos %}
+                        <option value="{{ tipo_documento_item }}">{{ tipo_documento_item }}</option>
+                        {% endfor %}
+                    </select><br>
+                    
+                    <label for="documento_identidad">Número de Documento de Identidad:</label>
+                    <input type="text" name="documento_identidad" id="documento_identidad" required><br>
+
+                    <label for="primer_nombre">Primer Nombre:</label>
+                    <input type="text" name="primer_nombre" id="primer_nombre" required><br>
+
+                    <label for="segundo_nombre">Segundo Nombre:</label>
+                    <input type="text" name="segundo_nombre" id="segundo_nombre"><br>
+                </div>
+
+                <div class="form-column">
+                    <label for="primer_apellido">Primer Apellido:</label>
+                    <input type="text" name="primer_apellido" id="primer_apellido" required><br>
+
+                    <label for="segundo_apellido">Segundo Apellido:</label>
+                    <input type="text" name="segundo_apellido" id="segundo_apellido"><br>
+
+                    <label for="fecha_nacimiento">Fecha de Nacimiento:</label>
+                    <input type="date" name="fecha_nacimiento" id="fecha_nacimiento" required><br>
+
+                    <label for="sexo">Sexo:</label>
+                    <select name="sexo" id="sexo">
+                        <option value="" disabled selected>Seleccione...</option>
+                        <option value="masculino">Masculino</option>
+                        <option value="femenino">Femenino</option>
+                    </select>
+                </div>
+            </div>
+            <div class="wizard-buttons">
+                <button type="button" onclick="nextPrev(1)">Siguiente</button>
+            </div>
+        </div>
+
+        <div class="wizard-step" id="step2">
+            <h3>Paso 2: Detalles Personales y Familiares</h3>
+
+            <div class="step-content-columns">
+                <div class="form-column">
+                    <label for="nivel_escolaridad">Nivel de Escolaridad:</label>
+                    <select name="nivel_escolaridad" id="nivel_escolaridad">
+                        <option value="" disabled selected>Seleccione...</option>
+                        {% for nivel in niveles_escolaridad %}
+                        <option value="{{ nivel }}">{{ nivel }}</option>
+                        {% endfor %}
+                    </select><br>
+
+                    <label for="estado_civil">Estado Civil:</label>
+                    <select name="estado_civil" id="estado_civil">
+                        <option value="" disabled selected>Seleccione...</option>
+                        {% for estado in estado_civil %}
+                        <option value="{{ estado }}">{{ estado }}</option>
+                        {% endfor %}
+                    </select><br>
+
+                    <label for="composicion_familiar">Composición Familiar:</label>
+                    <textarea name="composicion_familiar" id="composicion_familiar"></textarea><br>
+                </div>
+
+                <div class="form-column">
+                    <label for="hijos">Número de hijos:</label>
+                    <select name="hijos" id="hijos">
+                        <option value="" disabled selected>Seleccione...</option>
+                        {% for hijo in hijos %}
+                        <option value="{{ hijo }}">{{ hijo }}</option>
+                        {% endfor %}
+                    </select><br>
+
+                    <label for="cabeza_hogar">¿Es Cabeza de Hogar?:</label>
+                    <select name="cabeza_hogar" id="cabeza_hogar">
+                        <option value="" disabled selected>Seleccione...</option>
+                        <option value="si">Si</option>
+                        <option value="no">No</option>
+                    </select>
+                </div>
+            </div>
+            <div class="wizard-buttons">
+                <button type="button" onclick="nextPrev(-1)">Anterior</button>
+                <button type="button" onclick="nextPrev(1)">Siguiente</button>
+            </div>
+        </div>
+
+        <div class="wizard-step" id="step3">
+            <h3>Paso 3: Información de Residencia</h3>
+            
+            <div class="step-content-columns">
+                <div class="form-column">
+                    <label class="form-label" for="departamento">Departamento:</label>
+                    <select class="form-control" id="departamento" name="departamento" onchange="cargarCiudades()" required>
+                        <option disabled selected value="">Seleccione un departamento</option>
+                        {% for d in departamentos %}
+                        <option value="{{ d.codigo }}">{{ d.nombre }}</option>
+                        {% endfor %}
+                    </select><br>
+                    
+                    <label class="form-label" for="ciudad">Ciudad:</label>
+                    <select class="form-control" id="ciudad" name="ciudad" required>
+                        <option disabled selected value="">Seleccione una ciudad</option>
+                    </select><br>
+                    
+                    <label for="direccion">Dirección de residencia:</label>
+                    <input type="text" name="direccion" id="direccion" required><br>
+                </div>
+
+                <div class="form-column">
+                    <label for="tipo_vivienda">Tipo de Vivienda:</label>
+                    <select name="tipo_vivienda" id="tipo_vivienda" required> 
+                        <option value="" disabled selected>Seleccione...</option>
+                        {% for tipo_v_item in tipos_viviendas %}
+                        <option value="{{ tipo_v_item }}">{{ tipo_v_item }}</option>
+                        {% endfor %}
+                    </select><br>
+
+                    <label for="estrato">Estrato Socioeconómico:</label>
+                    <select name="estrato" id="estrato">
+                        <option value="" disabled selected>Seleccione...</option>
+                        {% for estrato_item in estratos %}
+                        <option value="{{ estrato_item }}">{{ estrato_item }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="wizard-buttons">
+                <button type="button" onclick="nextPrev(-1)">Anterior</button>
+                <button type="button" onclick="nextPrev(1)">Siguiente</button>
+            </div>
+        </div>
+
+        <div class="wizard-step" id="step4">
+            <h3>Paso 4: Información Laboral y Económica</h3>
+            
+            <div class="step-content-columns">
+                <div class="form-column">
+                    <label for="fecha_ingreso_empresa">Fecha de Ingreso a la Empresa:</label>
+                    <input type="date" name="fecha_ingreso_empresa" id="fecha_ingreso_empresa" required><br>
+
+                    <label for="tipo_contrato">Tipo de Contrato:</label>
+                    <input type="text" name="tipo_contrato" id="tipo_contrato" required><br>
+
+                    <label for="cargo">Cargo:</label> 
+                    <select id="cargo" name="cargo" required>
+                        <option value="" disabled selected>Seleccione un cargo</option>
+                        {% for cargo_item in cargos %}
+                        <option value="{{ cargo_item.codigo }}">{{ cargo_item.nombre }}</option>
+                        {% endfor %}
+                    </select><br>
+                    
+                    <label for="area">Área:</label>
+                    <input type="text" id="area" name="area" readonly><br>
+                    
+                    <label for="proceso">Proceso:</label>
+                    <input type="text" id="proceso" name="proceso" readonly><br>
+                </div>
+
+                <div class="form-column">
+                    <label for="turno_trabajo">Turno de Trabajo:</label>
+                    <input type="text" name="turno_trabajo" id="turno_trabajo" required><br>
+
+                    <label for="ingresos">Ingresos:</label>
+                    <select id="ingresos" name="ingresos" required>
+                        <option value="" disabled selected>Seleccione un rango de ingresos</option>
+                        {% for ingreso_item in ingresos %}
+                        <option value="{{ ingreso_item }}">{{ ingreso_item }}</option>
+                        {% endfor %}
+                    </select><br>
+                    
+                    <label for="eps">EPS:</label>
+                    <input type="text" name="eps" id="eps" required><br>
+
+                    <label for="afp">AFP:</label>
+                    <input type="text" name="afp" id="afp" required>
+                </div>
+            </div>
+            <div class="wizard-buttons">
+                <button type="button" onclick="nextPrev(-1)">Anterior</button>
+                <button type="submit" id="submitButton">Guardar Información</button> 
+            </div>
+        </div>
+    
+    </form>
+
+<script>
+    // Tu JavaScript existente (no se necesita cambiar para esta modificación de layout HTML)
+    // ... (todo tu script que ya tenías) ...
+
+    const sociodemographicForm = document.getElementById('sociodemographicForm');
+    const urlCiudades = sociodemographicForm.dataset.urlCiudades;
+    const urlAreaProceso = sociodemographicForm.dataset.urlAreaProceso;
+
+    sociodemographicForm.addEventListener('submit', function(event) {
+        event.preventDefault(); 
+        // Validar el último paso antes de enviar
+        if (currentStep === totalSteps && !validateStep(currentStep)) { // Asegúrate que validateStep esté definida y funcione como esperas
+            alert('Por favor, completa todos los campos obligatorios del último paso antes de enviar.');
+            return;
+        }
+        const submitButton = document.getElementById('submitButton');
+        if(submitButton) submitButton.disabled = true;
+
+        const formData = new FormData(this);
+        fetch(this.action, { 
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.mensaje) {
+                alert('Éxito: ' + data.mensaje + (data.documento ? ' - Documento: ' + data.documento : ''));
+            } else if (data.error) {
+                alert('Error: ' + data.error);
+            } else {
+                alert('Respuesta no esperada del servidor.');
+            }
+        })
+        .catch(error => {
+            console.error('Error al enviar el formulario sociodemográfico:', error);
+            alert('Error de conexión al guardar. Intente de nuevo.');
+        })
+        .finally(() => {
+            if(submitButton) submitButton.disabled = false;
+        });
+    });
+
+    function cargarCiudades() {
+        const departamentoId = document.getElementById('departamento').value;
+        const ciudadDropdown = document.getElementById('ciudad');
+        ciudadDropdown.innerHTML = '<option disabled selected value="">Cargando...</option>';
+        if (!departamentoId) {
+            ciudadDropdown.innerHTML = '<option disabled selected value="">Seleccione una ciudad</option>';
+            return;
+        }
+        fetch(`${urlCiudades}?departamento=${departamentoId}`)
+            .then(response => response.json())
+            .then(data => {
+                ciudadDropdown.innerHTML = '<option disabled selected value="">Seleccione una ciudad</option>';
+                data.forEach(ciudad => {
+                    const option = document.createElement('option');
+                    option.value = ciudad.codigo;
+                    option.text = ciudad.nombre;
+                    ciudadDropdown.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Error en cargarCiudades:', error);
+                ciudadDropdown.innerHTML = '<option disabled selected value="">Error al cargar ciudades</option>';
+            });
+    }
+    
+    document.addEventListener('DOMContentLoaded', function () {
+        const cargoSelect = document.getElementById('cargo');
+        const areaInput = document.getElementById('area');
+        const procesoInput = document.getElementById('proceso');
+        if (cargoSelect) { 
+            cargoSelect.addEventListener('change', function () {
+                const cargoCodigo = cargoSelect.value;
+                if (areaInput) areaInput.value = '';
+                if (procesoInput) procesoInput.value = '';
+                if (cargoCodigo) {
+                    fetch(`${urlAreaProceso}?cargo_codigo=${cargoCodigo}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (areaInput) areaInput.value = data.area || '';
+                            if (procesoInput) procesoInput.value = data.proceso || '';
+                        })
+                        .catch(error => {
+                            alert('Error al obtener área y proceso.');
+                            console.error('Error en fetch area/proceso:', error);
+                        });
+                }
+            });
+        }
+        
+        // Inicializar el wizard (si no lo hace ya el script de abajo)
+        if (typeof showStep === "function" && typeof currentStep !== "undefined") { // Asegurar que las funciones del wizard estén definidas
+             showStep(currentStep);
+        }
+    });
+
+    // --- JavaScript para el Wizard ---
+    let currentStep = 1;
+    const totalSteps = 4; 
+    const steps = document.querySelectorAll(".wizard-step");
+    const progressBar = document.getElementById("progressBar");
+
+    function showStep(stepNumber) {
+        steps.forEach((step, index) => {
+            if ((index + 1) === stepNumber) {
+                step.classList.add("active");
+            } else {
+                step.classList.remove("active");
+            }
+        });
+        if (typeof updateProgressBar === "function") updateProgressBar(); // Asegurar que updateProgressBar exista
+    }
+
+    function updateProgressBar() {
+        if (!progressBar) return; // Salir si progressBar no existe
+        const progressPercentage = ((currentStep -1) / (totalSteps -1)) * 100;
+        progressBar.style.width = `${progressPercentage}%`;
+        progressBar.textContent = `Paso ${currentStep} de ${totalSteps}`;
+        if (currentStep === totalSteps) {
+            progressBar.textContent = `Paso ${currentStep} de ${totalSteps} - Listo para enviar`;
+        }
+    }
+
+    function validateStep(stepNumber) {
+        const currentStepElement = document.getElementById(`step${stepNumber}`);
+        if (!currentStepElement) return false;
+
+        const inputs = currentStepElement.querySelectorAll("input[required], select[required], textarea[required]");
+        let isValid = true;
+        inputs.forEach(input => {
+            input.style.borderColor = ""; // Resetear borde
+            if ((input.type === "select-one" && !input.value && input.options[0] && input.options[0].disabled) || (!input.value && input.required) ) {
+                // Caso especial para selects con opción "Seleccione..." deshabilitada
+                if (input.type === "select-one" && input.value === "" && input.options[0] && input.options[0].disabled && input.required) {
+                     isValid = false;
+                     input.style.borderColor = "red";
+                } else if (input.required && !input.value) {
+                    isValid = false;
+                    input.style.borderColor = "red";
+                }
+            } else if (input.required && !input.value) { // Para otros inputs requeridos
+                 isValid = false;
+                 input.style.borderColor = "red";
+            }
+        });
+        if (!isValid) {
+            alert("Por favor, completa todos los campos obligatorios del paso actual.");
+        }
+        return isValid;
+    }
+
+    function nextPrev(n) {
+        if (n === 1 && currentStep < totalSteps) {
+            if (!validateStep(currentStep)) {
+                return false; 
+            }
+        }
+        const nextStepNumber = currentStep + n;
+        if (nextStepNumber > 0 && nextStepNumber <= totalSteps) {
+            currentStep = nextStepNumber;
+            showStep(currentStep);
+        }
+    }
+    // --- FIN JavaScript para el Wizard ---
+</script>
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}

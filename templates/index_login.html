@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+
+{% block title %}Iniciar Sesión{% endblock %}
+
+{% block content %}
+
+{# Contenedor para el logo grande encima del título "Iniciar sesión" #}
+
+    <div class="login-form-logo-container">
+        {# Asegúrate que la ruta a tu logo 'G' grande sea correcta, actualmente es logo.png #}
+        <img src="https://res.cloudinary.com/drwenzp1j/image/upload/t_Profile/v1747175222/logo_pkbrvf.png" alt="Logo" class="login-logo">
+    </div>
+
+    <h2>Iniciar Sesion</h2>
+    
+    <form action="{{ url_for('auth.login') }}" method="POST">
+
+        {# --- Campo Correo Electrónico --- #}
+        <div class="form-group-custom">
+            <label for="email">Correo electrónico:</label>
+            <div class="input-group mb-3">
+                <span class="input-group-text icon-prefix material-symbols-outlined" id="addon-email">mail</span>
+                <input type="email" class="form-control" placeholder="Digita tu correo electrónico" aria-label="Correo electrónico" aria-describedby="addon-email" name="email" id="email">
+            </div>            
+        </div>
+
+        {# --- Campo Contraseña --- #}
+        <div class="form-group-custom"> {# Usamos la misma clase para la consistencia del grupo label + input #}
+            <label for="password">Contraseña:</label>
+            <div class="input-group mb-3">
+                <span class="input-group-text icon-prefix material-symbols-outlined" id="addon-password">lock</span>
+                <input type="password" class="form-control" placeholder="Digita tu contraseña" aria-label="Password" aria-describedby="addon-password" name="password" id="password">
+            </div>    
+           
+        
+         <br>      
+      
+            <div class="form-options">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="exampleCheck1">
+                    <label class="form-check-label" for="exampleCheck1" name="recordarme">Recordarme</label>
+                </div>            
+                <a href="#" class="forgot-password">¿Olvidó su contraseña?</a>
+            </div>    
+
+
+            <button type="submit" class="btn-login-custom">Ingresar</button> {# Añadí la clase .btn-login-custom por si tienes estilos específicos para este botón #}
+        </div>
+    </form>
+
+{% endblock %}
+
+{% block scripts %}
+    {# Si tienes scripts específicos para esta página, puedes añadirlos aquí #}
+    {{ super() }} {# Si quieres heredar scripts del bloque 'scripts' de layout.html #}
+{% endblock %}

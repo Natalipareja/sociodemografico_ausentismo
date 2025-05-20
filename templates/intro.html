@@ -1,0 +1,65 @@
+{% extends "nav.html" %}
+
+{% block title %}Inicio{% endblock %}
+
+{% block head_extra %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_intro.css') }}">
+{% endblock %}
+
+{% block content %}
+  <div id="carouselExampleDark" class="carousel carousel-dark slide w-100"> 
+    <div class="carousel-indicators">
+      <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+      <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="1" aria-label="Slide 2"></button>
+      <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="2" aria-label="Slide 3"></button>
+      <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="3" aria-label="Slide 4"></button>
+    </div>
+    <div class="carousel-inner h-100"> <div class="carousel-item active h-100" data-bs-interval="7000">
+        <img src="https://res.cloudinary.com/drwenzp1j/image/upload/v1747175221/info_cb9xx6.jpg" class="d-block w-100 h-100" alt="Información Sociodemográfica">
+        <div class="carousel-caption">
+          <h5>
+            <a href="{{ url_for('sociodemografico.formulario_sociodemografico') }}" class="carousel-title-link">Información Sociodemográfica</a>
+          </h5>
+          <p>Aquí podrá ingresar toda la información 
+sociodemográfica de la población trabajadora, se hará por medio de un formulario el cual se divide en tres partes, en el primero se registran datos  personales del empleado, en el segundo datos familiares y el tercero datos laborales.</p>
+        </div>
+      </div>
+      <div class="carousel-item h-100" data-bs-interval="7000">
+        <img src="https://res.cloudinary.com/drwenzp1j/image/upload/v1747175221/digitar_jnwqxz.jpg" class="d-block w-100 h-100" alt="Reporte de Ausentismo">
+        <div class="carousel-caption">
+          <h5>
+            <a href="{{ url_for('ausentismo.formulario_ausentismo') }}" class="carousel-title-link">Reporte de Ausentismo</a>
+          </h5>
+          <p>Aquí podráh ingresar toda la información 
+relacionada con la incapacidad que presentó el trabajador, al digitar el tipo y documento de identidad el sistema traerá toda la información del empleado, entonces son pocos los datos que se deben registrar por incapacidad.</p>
+        </div>
+      </div>
+      <div class="carousel-item h-100" data-bs-interval="7000">
+        <img src="https://res.cloudinary.com/drwenzp1j/image/upload/v1747434922/consolidado_ni0xjq.jpg" class="d-block w-100 h-100" alt="Consolidados">
+        <div class="carousel-caption">
+          <h5>Consolidados</h5>
+          <p>Aquí podrá encontrar el consolidado tanto de la información sociodemográfica como del ausentismo, los cuales puede además de visualizar descargar en formato Excel.</p>
+        </div>
+      </div>
+      <div class="carousel-item h-100" data-bs-interval="7000">
+        <img src="https://res.cloudinary.com/drwenzp1j/image/upload/v1747434922/analitica_dkuxl1.jpg" class="d-block w-100 h-100" alt="Analíticas Avanzadas">
+        <div class="carousel-caption">
+          <h5>Analíticas</h5>
+          <p>Aquí podrá encontrar las analíticas tanto de la información sociodemográfica como del ausentismo, las cuales puedes además de visualizar descargar en formato PDF.</p>
+        </div>
+      </div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Next</span>
+    </button>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+{% endblock %}
