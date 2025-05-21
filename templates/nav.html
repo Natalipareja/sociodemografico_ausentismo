@@ -14,19 +14,24 @@
     <header class="main-header">
         <nav class="navbar navbar-expand-lg bg-body-tertiary">
             <div class="container-fluid">
-                <a class="navbar-brand" href="#"><img src="https://res.cloudinary.com/drwenzp1j/image/upload/t_Profile/v1747175222/logo_pkbrvf.png" alt="Logo" width="50" height="50" class="d-inline-block align-text-top">
+                <a class="navbar-brand" href="{{ url_for('sociodemografico.intro') if session.get('user_logged_in') else url_for('auth.index') }}"><img src="https://res.cloudinary.com/drwenzp1j/image/upload/t_Profile/v1747175222/logo_pkbrvf.png" alt="Logo" width="50" height="50" class="d-inline-block align-text-top">
                 Gestiona</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
                 </button>
+
                 <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav">
-                        <li class="nav-item"><a class="nav-link active" aria-current="page" href="{{ url_for('auth.index') }}">Login</a></li> 
-                        <li class="nav-item"><a class="nav-link active" aria-current="page" href="{{ url_for('usuario.formulario_registro') }}">Registrar Usuario</a></li> 
-                        <li class="nav-item"><a class="nav-link active" aria-current="page" href="{{ url_for('sociodemografico.intro') }}">intro</a></li>
-                        <li class="nav-item"><a class="nav-link active" aria-current="page" href="{{ url_for('sociodemografico.formulario_sociodemografico') }}">Info Sociodemográfica</a></li>
-                        <li class="nav-item"><a class="nav-link active" aria-current="page" href="{{ url_for('ausentismo.formulario_ausentismo') }}">Registrar Ausentismo</a></li>
-                        <li class="nav-item"><a class="nav-link active" aria-current="page" href="{{ url_for('sociodemografico.consolidado_sociodemografico_tabla') }}">Consolidado Información Sociodemográfica</a></li>
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                        {% if session.get('user_logged_in') %}                        
+                            <li class="nav-item"><a class="nav-link active" aria-current="page" href="{{ url_for('sociodemografico.intro') }}">Inicio</a></li>
+                            <li class="nav-item"><a class="nav-link active" aria-current="page" href="{{ url_for('sociodemografico.formulario_sociodemografico') }}">Info Sociodemográfica</a></li>
+                            <li class="nav-item"><a class="nav-link active" aria-current="page" href="{{ url_for('ausentismo.formulario_ausentismo') }}">Registrar Ausentismo</a></li>
+                            <li class="nav-item"><a class="nav-link active" aria-current="page" href="{{ url_for('sociodemografico.consolidado_sociodemografico_tabla') }}">Consolidado Información Sociodemográfica</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.logout') }}">Cerrar Sesión</a></li>
+                        {% else %}
+                            <li class="nav-item"><a class="nav-link active" aria-current="page" href="{{ url_for('usuario.formulario_registro') }}">Crear Cuenta</a></li> 
+                            <li class="nav-item"><a class="nav-link active" aria-current="page" href="{{ url_for('auth.index') }}">Iniciar Sesión</a></li> 
+                        {% endif %}
                     </ul>
                 </div>
             </div>
