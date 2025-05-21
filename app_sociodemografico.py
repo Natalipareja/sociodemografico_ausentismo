@@ -123,7 +123,25 @@ def formulario_sociodemografico():
        #Cargar departamentos
         cursor.execute("SELECT codigo, nombre FROM departamento")
         departamentos = cursor.fetchall()
-
+        
+         #Cargar contratos
+        cursor.execute("SELECT codigo, nombre FROM tipo_contrato")
+        contratos = cursor.fetchall()
+        
+         #Cargar turnos
+        cursor.execute("SELECT codigo, nombre FROM turno_trabajo")
+        turnos = cursor.fetchall()
+        
+          #Cargar epss
+        cursor.execute("SELECT codigo, nombre FROM eps")
+        epss = cursor.fetchall()
+        
+         #Cargar afps
+        cursor.execute("SELECT codigo, nombre FROM afp")
+        afps = cursor.fetchall()
+            
+        
+        
  # Lista de tipo documento
         tipos_documentos = [
             "Registro civil de nacimiento",
@@ -191,8 +209,8 @@ def formulario_sociodemografico():
             "Entre 4 y 5 SMLMV",
             "Entre 6 y 7 SMLMV", 
             "Mas de 8 SMLMV"                       
-        ]
-          
+        ]  
+        
         return render_template(
             'index_sociodemografico.html',
             
@@ -204,7 +222,12 @@ def formulario_sociodemografico():
             hijos=hijos,
             tipos_viviendas=tipos_viviendas,
             estratos=estratos,
-            ingresos=ingresos
+            ingresos=ingresos,
+            contratos=contratos,
+            turnos=turnos,
+            epss=epss,
+            afps=afps
+            
         )
     except Exception as e:
         print(f"Error en formulario_sociodemografico: {e}") # <--  Log error

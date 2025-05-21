@@ -168,7 +168,12 @@
                     <input type="date" name="fecha_ingreso_empresa" id="fecha_ingreso_empresa" required><br>
 
                     <label for="tipo_contrato">Tipo de Contrato:</label>
-                    <input type="text" name="tipo_contrato" id="tipo_contrato" required><br>
+                    <select name="tipo_contrato" id="tipo_contrato">
+                        <option value="" disabled selected>Seleccione...</option>
+                        {% for tipo_contrato in contratos %}
+                        <option value="{{ tipo_contrato.codigo }}">{{ tipo_contrato.nombre }}</option>
+                        {% endfor %}
+                    </select>
 
                     <label for="cargo">Cargo:</label> 
                     <select id="cargo" name="cargo" required>
@@ -187,7 +192,12 @@
 
                 <div class="form-column">
                     <label for="turno_trabajo">Turno de Trabajo:</label>
-                    <input type="text" name="turno_trabajo" id="turno_trabajo" required><br>
+                    <select name="turno_trabajo" id="turno_trabajo">
+                        <option value="" disabled selected>Seleccione...</option>
+                        {% for turno_trabajo in turnos %}
+                        <option value="{{ turno_trabajo.codigo }}">{{ turno_trabajo.nombre }}</option>
+                        {% endfor %}
+                    </select>
 
                     <label for="ingresos">Ingresos:</label>
                     <select id="ingresos" name="ingresos" required>
@@ -198,10 +208,20 @@
                     </select><br>
                     
                     <label for="eps">EPS:</label>
-                    <input type="text" name="eps" id="eps" required><br>
+                     <select name="eps" id="eps">
+                        <option value="" disabled selected>Seleccione...</option>
+                        {% for eps in epss %}
+                        <option value="{{ eps.codigo }}">{{ eps.nombre }}</option>
+                        {% endfor %}
+                    </select>
 
                     <label for="afp">AFP:</label>
-                    <input type="text" name="afp" id="afp" required>
+                     <select name="afp" id="afp">
+                        <option value="" disabled selected>Seleccione...</option>
+                        {% for afp in afps %}
+                        <option value="{{ afp.codigo }}">{{ afp.nombre }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
             </div>
             <div class="wizard-buttons">
