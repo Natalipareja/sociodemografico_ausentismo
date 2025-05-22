@@ -1,4 +1,4 @@
-# app.py (CORREGIDA función fetch_all_from_table)
+
 import mysql.connector
 from flask import Blueprint, render_template, request, jsonify, url_for
 import os
@@ -10,12 +10,11 @@ ausentismo_bp = Blueprint('ausentismo', __name__)
 
 
 # --- Funciones Auxiliares de Base de Datos ---
-# CORREGIDA para evitar "Unread result found"
 def fetch_all_from_table(table_name, order_by=None, columns='codigo, nombre'):
     """Obtiene registros de una tabla. Simplificado para evitar 'Unread result'."""
-    conn = None # <-- CAMBIO: Renombrado y inicializado
-    cursor = None # <-- CAMBIO: Inicializado
-    # Si no se especifica orden, intentar ordenar por la primera columna seleccionada
+    conn = None # <-- Renombrado y inicializado
+    cursor = None # <-- Inicializado
+   
     if not order_by:
         order_by = columns.split(',')[0].strip()
 
@@ -89,8 +88,6 @@ def formulario_ausentismo():
             columns='codigo, nombre, grupo, segmento',
             order_by='codigo'
         )
-
-
         tipos_documentos = [
             "Registro civil de nacimiento", "Tarjeta de identidad", "Cédula de ciudadanía",
             "Tarjeta de extranjería", "Cédula de extranjería", "Pasaporte",
@@ -260,7 +257,15 @@ def guardar_ausentismo():
             # 4. Commit
             conn.commit()
             print(f"--- COMMIT realizado. Ausentismo: {codigo_ausentismo} guardado para empleado: {documento_identidad}. ---")
-            return jsonify({"mensaje": "Datos de ausentismo guardados correctamente", "codigo_ausentismo": codigo_ausentismo, "documento": documento_identidad}), 201
+            
+        
+    # --- INICIO DEL ÚNICO CAMBIO ESTRUCTURAL EN EL JSON DE ÉXITO ---
+            return jsonify({"mensaje": f"Datos de ausentismo para el documento {documento_identidad} guardados correctamente. Código Ausentismo: {codigo_ausentismo}", # Mensaje mejorado
+                "codigo_ausentismo": codigo_ausentismo, 
+                "documento": documento_identidad,
+                "redirect_url": url_for('ausentismo.formulario_ausentismo') # <<<--- CAMBIO NECESARIO: Añadir esta URL
+            }), 201
+            # --- FIN DEL ÚNICO CAMBIO ESTRUCTURAL EN EL JSON DE ÉXITO --
 
         except mysql.connector.Error as db_err_tran:
             print(f"!!! Error de BD DENTRO de la transacción: {db_err_tran} !!!")

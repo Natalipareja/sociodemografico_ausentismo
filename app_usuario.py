@@ -1,13 +1,11 @@
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash
 import hashlib
 import conexion 
-
+from datetime import datetime
 
 usuario_bp = Blueprint('usuario', __name__)
 
-
 # Ruta para procesar el formulario y guardar los datos
-
 @usuario_bp.route('/guardar_usuario', methods=['POST'])
 
 def guardar_usuario():
@@ -28,9 +26,10 @@ def guardar_usuario():
         segundo_apellido = request.form['segundo_apellido']
         email = request.form['email']
         password = request.form['password']
-        fecha_creacion = request.form['fecha_creacion']
-        fecha_actualizacion = request.form['fecha_actualizacion']
         
+        
+        # --- 2. OBTENER FECHA Y HORA ACTUAL ---
+        ahora = datetime.now() # Esto será usado para fecha_creacion y fecha_actualizacion
                
          # Conectar a MySQL
         conn = conexion.obtener_conexion()
@@ -39,8 +38,7 @@ def guardar_usuario():
              return jsonify({"error": "No se pudo conectar a la base de datos"}), 500
 
         cur = conn.cursor()
-        
-        
+               
                
         #cifrar la contraseña
         cifrado = hashlib.sha256()
@@ -53,36 +51,43 @@ def guardar_usuario():
             (tipo_documento, doc_id, primer_nombre, segundo_nombre, primer_apellido, segundo_apellido, email, password, fecha_creacion, fecha_actualizacion) 
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """       
-        valores = (tipo_documento, doc_id,  primer_nombre, segundo_nombre, primer_apellido, segundo_apellido, email, password_cifrada, fecha_creacion, fecha_actualizacion)
+        valores = (tipo_documento, doc_id,  primer_nombre, segundo_nombre, primer_apellido, segundo_apellido, email, password_cifrada, ahora, ahora) #Ahora para ambas fechas
         
         cur.execute(sql, valores)
-
         # Guardar cambios
         conn.commit()
+        
+        
+        # --- 2. MENSAJE FLASH DE ÉXITO ---
+        flash(f"¡Usuario {primer_nombre} {primer_apellido} guardado correctamente!", "success")
+        
+        return redirect(url_for('usuario.formulario_registro'))
 
-        return jsonify({
-            "mensaje": "Datos guardados correctamente",
-            # "codigo_ausentismo": codigo_ausentismo,
-            "documento": doc_id            
-        }), 200
+       
 
     except Exception as e:
         # Manejo de errores
         # Es buena idea hacer rollback si algo falla durante la transacción
         if conn:
             conn.rollback()
-        return jsonify({"error": str(e)}), 500
+            
+        error_message = f"Error del servidor: {str(e)}"
+        print(f"ERROR DETALLADO en guardar_usuario: {type(e).__name__} - {str(e)}")
+        
+         # --- 4. MENSAJE FLASH DE ERROR Y REDIRECCIÓN (OPCIONAL PERO RECOMENDADO) ---
+        flash(f"No se pudo guardar el usuario. {error_message}", "error")
+        # Redirigir de vuelta al formulario en caso de error para que el usuario pueda intentarlo de nuevo.
+        return redirect(url_for('usuario.formulario_registro'))
+        # ANTERIORMENTE:
+        # return jsonify({"error": error_message}), 500
 
     finally:
-         # Cierre de conexión usando la función del módulo (opcional pero recomendado)
-        # <-- CAMBIO: Se llama a la función de cierre del módulo 'conexion'
         conexion.cerrar_conexion(conn, cur)
-        
-  #_________________________________________________________________________________
+    
+    #_________________________________________________________________________________
   #Ruta para mostrar el formulario
   
   
-# trae cargos y departamentos
 
 @usuario_bp.route('/')
 def formulario_registro():
@@ -110,8 +115,7 @@ def formulario_registro():
      
           
         return render_template(
-            'index_usuario.html',
-            
+            'index_usuario.html',            
             tipos_documentos=tipos_documentos
            
         )

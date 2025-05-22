@@ -170,12 +170,12 @@ h2,h3{
     padding: 8px 12px;
     border: 1px solid #ced4da;
     border-left: none; /* Para que se una visualmente al input */
-    background-color: #e9ecef;
-    cursor: pointer;
-    border-top-right-radius: .25rem;
-    border-bottom-right-radius: .25rem;
+    background-color: var(--fourth_color);
+    cursor: pointer;    
+    border-radius: .25rem;
     font-size: 1rem;
     line-height: 1.5; /* Para alinear con el input height */
+    color: var(--third_color);
 }
 .input-group .btn-search-cie10:hover {
     background-color: #d8dde2;
