@@ -29,6 +29,8 @@ body{
 }
 
 h2,h3{
+    padding-top: 20px;
+    font-family: var(--primary_font);
     text-align: center;
     color: var(--third_color);
 }

@@ -4,10 +4,11 @@
 
 {% block head_extra %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style_reporte_ausentismo.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
 {% endblock %}
 
 {% block content %}
-    <h2>Formulario Datos Ausentismo</h2>
+    <h2 class="animate__animated animate__backInLeft">Formulario Datos Ausentismo</h2>
     <div id="form-message" class="message" style="display: none;"></div>
 
     <form id="ausentismo-form" action="{{ url_for('ausentismo.guardar_ausentismo') }}" method="POST"

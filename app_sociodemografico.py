@@ -297,7 +297,6 @@ def obtener_area_proceso():
         conexion.cerrar_conexion(conn, cursor)
 
 
-
 # =================================================================================
 # ========= AQUÍ VA LA NUEVA RUTA PARA EL CONSOLIDADO SOCIODEOGRÁFICO ============
 # =================================================================================
@@ -317,9 +316,9 @@ def consolidado_sociodemografico_tabla():
 
         cursor = conn.cursor(dictionary=True) # Obtener resultados como diccionarios
 
-        # Consulta SQL para obtener todos los datos necesarios para el consolidado
-        # Se hacen JOINs para obtener los nombres en lugar de solo los códigos
-        # Se formatean las fechas directamente en la consulta
+        # --- COMIENZO DEL CAMBIO: MODIFICAR ESTA CONSULTA SQL ---
+        # Se añaden 4 LEFT JOIN más y se cambian los campos en el SELECT
+        # para obtener los NOMBRES en lugar de los códigos.
         sql_consolidado = """
             SELECT
                 i.usuario, i.tipo_documento, i.documento_identidad,
@@ -327,23 +326,46 @@ def consolidado_sociodemografico_tabla():
                 DATE_FORMAT(i.fecha_nacimiento, '%Y-%m-%d') AS fecha_nacimiento_formateada,
                 i.sexo, i.nivel_escolaridad, i.estado_civil,
                 i.composicion_familiar, i.hijos, i.cabeza_hogar,
-                ciudad.nombre AS nombre_ciudad,          -- Nombre de la ciudad
+                ciudad.nombre AS nombre_ciudad,           -- Nombre de la ciudad
                 departamento.nombre AS nombre_departamento, -- Nombre del departamento
                 i.direccion, i.tipo_vivienda, i.estrato,
                 DATE_FORMAT(i.fecha_ingreso_empresa, '%Y-%m-%d') AS fecha_ingreso_formateada,
-                i.tipo_contrato,
-                cargo.nombre AS nombre_cargo,            -- Nombre del cargo
-                area.nombre AS nombre_area,              -- Nombre del área
-                proceso.nombre AS nombre_proceso,        -- Nombre del proceso
-                i.turno_trabajo, i.ingresos, i.eps, i.afp
+                
+                -- CAMBIO 1: Obtener nombre del tipo de contrato
+                tc.nombre AS tipo_contrato,
+                
+                cargo.nombre AS nombre_cargo,             -- Nombre del cargo
+                area.nombre AS nombre_area,               -- Nombre del área
+                proceso.nombre AS nombre_proceso,         -- Nombre del proceso
+                
+                -- CAMBIO 2: Obtener nombre del turno de trabajo
+                tt.nombre AS turno_trabajo,
+                
+                i.ingresos, 
+                
+                -- CAMBIO 3: Obtener nombre de la EPS
+                e.nombre AS eps, 
+                
+                -- CAMBIO 4: Obtener nombre de la AFP
+                a.nombre AS afp
+                
             FROM infosociodemografica i
             LEFT JOIN ciudad ON i.ciudad = ciudad.codigo
             LEFT JOIN departamento ON ciudad.departamento = departamento.codigo
             LEFT JOIN cargo ON i.cargo = cargo.codigo
             LEFT JOIN area ON cargo.area = area.codigo
             LEFT JOIN proceso ON area.proceso = proceso.codigo
+            
+            -- CAMBIO 5: Añadir las nuevas uniones (JOINs) a las tablas correspondientes
+            LEFT JOIN tipo_contrato tc ON i.tipo_contrato = tc.codigo
+            LEFT JOIN turno_trabajo tt ON i.turno_trabajo = tt.codigo
+            LEFT JOIN eps e ON i.eps = e.codigo
+            LEFT JOIN afp a ON i.afp = a.codigo
+            
             ORDER BY i.primer_apellido, i.primer_nombre; -- Opcional: ordenar los resultados
         """
+        # --- FIN DEL CAMBIO ---
+
         cursor.execute(sql_consolidado)
         registros_para_tabla = cursor.fetchall()
 
@@ -355,7 +377,7 @@ def consolidado_sociodemografico_tabla():
         conexion.cerrar_conexion(conn, cursor)
 
     # Renderizar la plantilla HTML del consolidado, pasando los datos.
-    # El nombre 'consolidado_sociodemografico.html' debe coincidir con tu archivo en la carpeta 'templates'.
+    # El nombre 'consolidado_sociodemografic.html' debe coincidir con tu archivo en la carpeta 'templates'.
     return render_template('consolidado_sociodemografico.html', registros_para_tabla=registros_para_tabla)
 # =================================================================================
 # ======================= FIN DE LA NUEVA RUTA ====================================

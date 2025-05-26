@@ -30,8 +30,10 @@ body{
 }
 
 h2, h3{
+    padding-top: 20PX;
     text-align: center;
     font-family: var(--primary_font);
+    color: var(--third_color);
 }
 /* Estilos para el Formulario Wizard */
 

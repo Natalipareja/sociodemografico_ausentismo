@@ -4,10 +4,11 @@
 
 {% block head_extra %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style_infosociodemografico.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
 {% endblock %}
 
 {% block content %}
-    <h2>Información Sociodemográfica</h2>
+    <h2 class="animate__animated animate__backInLeft">Información Sociodemográfica</h2>
     
     <form action="{{ url_for('sociodemografico.guardar_info') }}" method="POST" id="sociodemographicForm"
           data-url-ciudades="{{ url_for('sociodemografico.obtener_ciudades') }}"

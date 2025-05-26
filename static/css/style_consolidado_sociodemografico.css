@@ -29,6 +29,8 @@ body{
 }
 
 h2{
+    font-family: var(--primary_font);
+    margin-top: 20px;
     text-align: center;
 }
 /* Contenedor principal para la tabla, permite el scroll horizontal y la centra */
@@ -67,7 +69,15 @@ h2{
     z-index: 2; /* Asegura que los encabezados estén sobre el contenido de las celdas */
     /* background-color: #f8f9fa; /* Color de fondo para los encabezados, ajusta al de tu tema */
     /* Usar variables de Bootstrap 5 para el fondo si están disponibles y son adecuadas */
-    background-color: var(--bs-table-bg, #f8f9fa);
+    background-color: var(--third_color);
+    color: var(--primary_color);
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    font-weight: var(--medium_font_weight, 500);
+    z-index: 3; /* z-index alto para la cabecera */
+    border-bottom: 2px solid var(--fifth_color, #5c94b4);
+    text-align: center;
 }
 
 /* Para las celdas (td) fijas y los encabezados (th) de esas columnas fijas */
@@ -77,8 +87,7 @@ h2{
     position: sticky;
     /* background-color: #ffffff; /* Fondo para las celdas fijas. Asegúrate que sea opaco. */
     /* Usar variables de Bootstrap 5 para el fondo si están disponibles y son adecuadas */
-    background-color: var(--bs-body-bg, #fff); /* O var(--bs-table-bg, #fff) */
-    z-index: 1; /* z-index base para las celdas fijas */
+        z-index: 1; /* z-index base para las celdas fijas */
 }
 
 /* Encabezados (th) de las columnas fijas necesitan un z-index mayor que los td fijos */
