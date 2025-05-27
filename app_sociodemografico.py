@@ -298,7 +298,7 @@ def obtener_area_proceso():
 
 
 # =================================================================================
-# ========= AQUÍ VA LA NUEVA RUTA PARA EL CONSOLIDADO SOCIODEOGRÁFICO ============
+# ========= AQUÍ VA LA RUTA PARA EL CONSOLIDADO SOCIODEOGRÁFICO ============
 # =================================================================================
 @sociodemografico_bp.route('/consolidado')
 def consolidado_sociodemografico_tabla():
@@ -324,6 +324,10 @@ def consolidado_sociodemografico_tabla():
                 i.usuario, i.tipo_documento, i.documento_identidad,
                 i.primer_nombre, i.segundo_nombre, i.primer_apellido, i.segundo_apellido,
                 DATE_FORMAT(i.fecha_nacimiento, '%Y-%m-%d') AS fecha_nacimiento_formateada,
+                
+                -- LÍNEA AÑADIDA PARA CALCULAR LA EDAD --
+                TIMESTAMPDIFF(YEAR, i.fecha_nacimiento, CURDATE()) AS edad,
+                
                 i.sexo, i.nivel_escolaridad, i.estado_civil,
                 i.composicion_familiar, i.hijos, i.cabeza_hogar,
                 ciudad.nombre AS nombre_ciudad,           -- Nombre de la ciudad
@@ -371,7 +375,7 @@ def consolidado_sociodemografico_tabla():
 
     except Exception as e:
         print(f"Error al obtener datos para el consolidado sociodemográfico: {e}")
-        # Podrías pasar un mensaje de error a la plantilla si lo deseas
+      
         return render_template('consolidado_sociodemografico.html', registros_para_tabla=registros_para_tabla, error_db=f"Error al obtener datos: {e}")
     finally:
         conexion.cerrar_conexion(conn, cursor)
@@ -382,3 +386,139 @@ def consolidado_sociodemografico_tabla():
 # =================================================================================
 # ======================= FIN DE LA NUEVA RUTA ====================================
 # =================================================================================
+
+
+
+
+# =====================================================================
+# === RUTA PARA MOSTRAR LA PÁGINA DEL DASHBOARD DE GRÁFICOS ===
+# =====================================================================
+@sociodemografico_bp.route('/dashboard')
+def dashboard():
+    # Esta ruta simplemente renderiza el HTML. 
+    # El JavaScript se encargará de pedir los datos y dibujar los gráficos.
+    return render_template('dashboard_sociodemografico.html')
+
+
+# =====================================================================
+# === RUTA "API" PARA PROVEER TODOS LOS DATOS A LOS GRÁFICOS ===
+# =====================================================================
+@sociodemografico_bp.route('/dashboard/data')
+def dashboard_data():
+    conn = None
+    cursor = None
+    try:
+        conn = conexion.obtener_conexion()
+        cursor = conn.cursor(dictionary=True)
+
+        # Diccionario para almacenar los resultados de todas las consultas
+        data = {}
+
+        # 1. Gráfico por Edad (Rango)
+        query_edad = """
+            SELECT CASE
+                WHEN TIMESTAMPDIFF(YEAR, fecha_nacimiento, CURDATE()) BETWEEN 18 AND 25 THEN '18-25'
+                WHEN TIMESTAMPDIFF(YEAR, fecha_nacimiento, CURDATE()) BETWEEN 26 AND 35 THEN '26-35'
+                WHEN TIMESTAMPDIFF(YEAR, fecha_nacimiento, CURDATE()) BETWEEN 36 AND 45 THEN '36-45'
+                WHEN TIMESTAMPDIFF(YEAR, fecha_nacimiento, CURDATE()) BETWEEN 46 AND 55 THEN '46-55'
+                ELSE '55+' END AS rango_edad, COUNT(*) as total
+            FROM infosociodemografica WHERE fecha_nacimiento IS NOT NULL GROUP BY rango_edad ORDER BY rango_edad;
+        """
+        cursor.execute(query_edad)
+        data['edad'] = cursor.fetchall()
+
+        # 2. Gráfico por Género
+        cursor.execute("SELECT sexo, COUNT(*) as total FROM infosociodemografica WHERE sexo IS NOT NULL AND sexo != '' GROUP BY sexo;")
+        data['genero'] = cursor.fetchall()
+
+        # 3. Gráfico por Nivel de Escolaridad
+        cursor.execute("SELECT nivel_escolaridad, COUNT(*) as total FROM infosociodemografica WHERE nivel_escolaridad IS NOT NULL AND nivel_escolaridad != '' GROUP BY nivel_escolaridad ORDER BY total DESC;")
+        data['escolaridad'] = cursor.fetchall()
+
+        # 4. Gráfico por Estado Civil
+        cursor.execute("SELECT estado_civil, COUNT(*) as total FROM infosociodemografica WHERE estado_civil IS NOT NULL AND estado_civil != '' GROUP BY estado_civil ORDER BY total DESC;")
+        data['estado_civil'] = cursor.fetchall()
+
+        # 5. Gráfico por Número de Hijos
+        cursor.execute("SELECT hijos, COUNT(*) as total FROM infosociodemografica WHERE hijos IS NOT NULL AND hijos != '' GROUP BY hijos ORDER BY hijos;")
+        data['hijos'] = cursor.fetchall()
+
+        # 6. Gráfico por Lugar de Residencia (Top 10 Ciudades)
+        query_residencia = """
+            SELECT c.nombre as ciudad, COUNT(i.documento_identidad) as total
+            FROM infosociodemografica i JOIN ciudad c ON i.ciudad = c.codigo
+            GROUP BY c.nombre ORDER BY total DESC LIMIT 10;
+        """
+        cursor.execute(query_residencia)
+        data['residencia'] = cursor.fetchall()
+
+        # 7. Gráfico por Tipo de Vivienda
+        cursor.execute("SELECT tipo_vivienda, COUNT(*) as total FROM infosociodemografica WHERE tipo_vivienda IS NOT NULL AND tipo_vivienda != '' GROUP BY tipo_vivienda ORDER BY total DESC;")
+        data['vivienda'] = cursor.fetchall()
+
+        # 8. Gráfico por Estrato
+        cursor.execute("SELECT estrato, COUNT(*) as total FROM infosociodemografica WHERE estrato IS NOT NULL AND estrato != '' GROUP BY estrato ORDER BY estrato;")
+        data['estrato'] = cursor.fetchall()
+
+        # 9. Gráfico por Cabeza de Hogar
+        cursor.execute("SELECT cabeza_hogar, COUNT(*) as total FROM infosociodemografica WHERE cabeza_hogar IS NOT NULL AND cabeza_hogar != '' GROUP BY cabeza_hogar;")
+        data['cabeza_hogar'] = cursor.fetchall()
+
+        # 10. Gráfico por Tipo de Vinculación (Contrato)
+        query_vinculacion = """
+            SELECT tc.nombre as tipo_contrato, COUNT(i.documento_identidad) as total
+            FROM infosociodemografica i JOIN tipo_contrato tc ON i.tipo_contrato = tc.codigo
+            GROUP BY tc.nombre ORDER BY total DESC;
+        """
+        cursor.execute(query_vinculacion)
+        data['vinculacion'] = cursor.fetchall()
+
+        # 11. Gráfico por Proceso
+        query_proceso = """
+            SELECT p.nombre as proceso, COUNT(i.documento_identidad) as total
+            FROM infosociodemografica i
+            JOIN cargo c ON i.cargo = c.codigo
+            JOIN area a ON c.area = a.codigo
+            JOIN proceso p ON a.proceso = p.codigo
+            GROUP BY p.nombre ORDER BY total DESC;
+        """
+        cursor.execute(query_proceso)
+        data['proceso'] = cursor.fetchall()
+
+        # 12. Gráfico por Área
+        query_area = """
+            SELECT a.nombre as area, COUNT(i.documento_identidad) as total
+            FROM infosociodemografica i
+            JOIN cargo c ON i.cargo = c.codigo
+            JOIN area a ON c.area = a.codigo
+            GROUP BY a.nombre ORDER BY total DESC;
+        """
+        cursor.execute(query_area)
+        data['area'] = cursor.fetchall()
+
+        # 13. Gráfico por EPS (Top 10)
+        query_eps = """
+            SELECT e.nombre as eps, COUNT(i.documento_identidad) as total
+            FROM infosociodemografica i JOIN eps e ON i.eps = e.codigo
+            GROUP BY e.nombre ORDER BY total DESC LIMIT 10;
+        """
+        cursor.execute(query_eps)
+        data['eps'] = cursor.fetchall()
+
+        # 14. Gráfico por AFP (Top 10)
+        query_afp = """
+            SELECT af.nombre as afp, COUNT(i.documento_identidad) as total
+            FROM infosociodemografica i JOIN afp af ON i.afp = af.codigo
+            GROUP BY af.nombre ORDER BY total DESC LIMIT 10;
+        """
+        cursor.execute(query_afp)
+        data['afp'] = cursor.fetchall()
+
+        # Retornamos todo el diccionario de datos como un único JSON
+        return jsonify(data)
+
+    except Exception as e:
+        print(f"Error al obtener datos para el dashboard: {e}")
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conexion.cerrar_conexion(conn, cursor)

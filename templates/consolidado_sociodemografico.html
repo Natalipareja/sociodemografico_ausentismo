@@ -24,6 +24,7 @@
                     <th>Primer Apellido</th>
                     <th>Segundo Apellido</th>
                     <th>Fecha Nacimiento</th>
+                    <th>Edad</th>
                     <th>Sexo</th>
                     <th>Nivel Escolaridad</th>
                     <th>Estado Civil</th>
@@ -61,6 +62,7 @@
                         <td>{{ registro.primer_apellido if registro.primer_apellido is not none else '' }}</td>
                         <td>{{ registro.segundo_apellido if registro.segundo_apellido is not none else '' }}</td>
                         <td>{{ registro.fecha_nacimiento_formateada if registro.fecha_nacimiento_formateada is not none else (registro.fecha_nacimiento if registro.fecha_nacimiento is not none else '') }}</td>
+                        <td>{{ registro.edad | default('N/A') }}</td>
                         <td>{{ registro.sexo if registro.sexo is not none else '' }}</td>
                         <td>{{ registro.nivel_escolaridad if registro.nivel_escolaridad is not none else '' }}</td>
                         <td>{{ registro.estado_civil if registro.estado_civil is not none else '' }}</td>
@@ -91,7 +93,7 @@
                 {% else %}
                     {# Esta fila se mostrará si no hay registros #}
                     <tr id="noDataRow">
-                        <td colspan="30" class="text-center">No hay registros sociodemográficos para mostrar.</td> {# Ajustado el colspan #}
+                        <td colspan="31" class="text-center">No hay registros sociodemográficos para mostrar.</td> {# Ajustado el colspan #}
                     </tr>
                 {% endif %}
             </tbody>

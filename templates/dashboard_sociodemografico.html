@@ -1,0 +1,120 @@
+{% extends "nav.html" %}
+
+{% block title %}Gráficos Información Sociodemográfica{% endblock %} {# Título más específico #}
+
+{% block head_extra %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_graficos_sociodemografico.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <h2 class="text-center mb-5">Analíticas de Información Sociodemográfica</h2>
+
+    <div class="row">
+        <div class="col-lg-4 col-md-6 mb-4"><div class="card chart-card"><div class="card-header">Distribución por Género</div><div class="card-body"><canvas id="graficoGenero"></canvas></div></div></div>
+        <div class="col-lg-4 col-md-6 mb-4"><div class="card chart-card"><div class="card-header">Distribución por Estado Civil</div><div class="card-body"><canvas id="graficoEstadoCivil"></canvas></div></div></div>
+        <div class="col-lg-4 col-md-12 mb-4"><div class="card chart-card"><div class="card-header">¿Es Cabeza de Hogar?</div><div class="card-body"><canvas id="graficoCabezaHogar"></canvas></div></div></div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 mb-4"><div class="card chart-card"><div class="card-header">Distribución por Rango de Edad</div><div class="card-body"><canvas id="graficoEdad"></canvas></div></div></div>
+    </div>
+    
+    <div class="row">
+        <div class="col-12 mb-4"><div class="card chart-card"><div class="card-header">Nivel de Escolaridad</div><div class="card-body"><canvas id="graficoEscolaridad"></canvas></div></div></div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-4 col-md-6 mb-4"><div class="card chart-card"><div class="card-header">Número de Hijos</div><div class="card-body"><canvas id="graficoHijos"></canvas></div></div></div>
+        <div class="col-lg-4 col-md-6 mb-4"><div class="card chart-card"><div class="card-header">Tipo de Vivienda</div><div class="card-body"><canvas id="graficoVivienda"></canvas></div></div></div>
+        <div class="col-lg-4 col-md-12 mb-4"><div class="card chart-card"><div class="card-header">Estrato Socioeconómico</div><div class="card-body"><canvas id="graficoEstrato"></canvas></div></div></div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-4 col-md-12 mb-4"><div class="card chart-card"><div class="card-header">Tipo de Vinculación</div><div class="card-body"><canvas id="graficoVinculacion"></canvas></div></div></div>
+        <div class="col-lg-4 col-md-6 mb-4"><div class="card chart-card"><div class="card-header">Procesos</div><div class="card-body"><canvas id="graficoProceso"></canvas></div></div></div>
+        <div class="col-lg-4 col-md-6 mb-4"><div class="card chart-card"><div class="card-header">Áreas</div><div class="card-body"><canvas id="graficoArea"></canvas></div></div></div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 mb-4"><div class="card chart-card"><div class="card-header">Lugar de Residencia (Top 10 Ciudades)</div><div class="card-body"><canvas id="graficoResidencia"></canvas></div></div></div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6 col-md-12 mb-4"><div class="card chart-card"><div class="card-header">EPS (Top 10)</div><div class="card-body"><canvas id="graficoEps"></canvas></div></div></div>
+        <div class="col-lg-6 col-md-12 mb-4"><div class="card chart-card"><div class="card-header">AFP (Top 10)</div><div class="card-body"><canvas id="graficoAfp"></canvas></div></div></div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            // Colores base para los gráficos, puedes usar los de tus variables CSS
+            const colorPrincipal = 'rgba(26, 56, 99, 0.7)'; // --third_color
+            const colorSecundario = 'rgba(148, 219, 237, 0.7)'; // --fourth_color
+            const coloresPie = [colorPrincipal, colorSecundario, 'rgba(92, 148, 180, 0.7)', 'rgba(214, 214, 214, 0.7)'];
+
+            // Función genérica para crear gráficos de barras
+            function crearGraficoBarra(idCanvas, datos, campoLabel, titulo, esHorizontal = false, color = colorPrincipal) {
+                const ctx = document.getElementById(idCanvas).getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: datos.map(d => d[campoLabel]),
+                        datasets: [{ label: titulo, data: datos.map(d => d.total), backgroundColor: color }]
+                    },
+                    options: {
+                        indexAxis: esHorizontal ? 'y' : 'x',
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+
+            // Función genérica para crear gráficos de torta/dona
+            function crearGraficoPie(idCanvas, datos, campoLabel, titulo) {
+                 const ctx = document.getElementById(idCanvas).getContext('2d');
+                 new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: datos.map(d => d[campoLabel]),
+                        datasets: [{ label: titulo, data: datos.map(d => d.total), backgroundColor: coloresPie }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+                 });
+            }
+
+            // Pedimos todos los datos a nuestra API de una sola vez
+            fetch("{{ url_for('sociodemografico.dashboard_data') }}")
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) throw new Error(data.error);
+
+                    // Llamamos a las funciones para crear cada gráfico con los datos recibidos
+                    crearGraficoPie('graficoGenero', data.genero, 'sexo', 'Género');
+                    crearGraficoPie('graficoEstadoCivil', data.estado_civil, 'estado_civil', 'Estado Civil');
+                    crearGraficoPie('graficoCabezaHogar', data.cabeza_hogar, 'cabeza_hogar', 'Cabeza de Hogar');
+                    crearGraficoPie('graficoVivienda', data.vivienda, 'tipo_vivienda', 'Tipo de Vivienda');
+                    
+                    crearGraficoBarra('graficoEdad', data.edad, 'rango_edad', 'Rango de Edad');
+                    crearGraficoBarra('graficoEscolaridad', data.escolaridad, 'nivel_escolaridad', 'Nivel de Escolaridad', true, colorSecundario);
+                    crearGraficoBarra('graficoHijos', data.hijos, 'hijos', 'Número de Hijos');
+                    crearGraficoBarra('graficoEstrato', data.estrato, 'estrato', 'Estrato');
+                    crearGraficoBarra('graficoVinculacion', data.vinculacion, 'tipo_contrato', 'Tipo de Vinculación', true, colorSecundario);
+                    crearGraficoBarra('graficoProceso', data.proceso, 'proceso', 'Procesos', true);
+                    crearGraficoBarra('graficoArea', data.area, 'area', 'Áreas', true, colorSecundario);
+                    crearGraficoBarra('graficoResidencia', data.residencia, 'ciudad', 'Ciudades', true);
+                    crearGraficoBarra('graficoEps', data.eps, 'eps', 'EPS', true, colorSecundario);
+                    crearGraficoBarra('graficoAfp', data.afp, 'afp', 'AFP', true);
+                })
+                .catch(error => console.error('Error al cargar datos para los gráficos:', error));
+        });
+    </script>
+{% endblock %}
