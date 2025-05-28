@@ -4,6 +4,7 @@ from flask import Blueprint, render_template, request, jsonify, url_for
 import os
 import datetime # Para manejar fechas
 import conexion
+import math #para la paginación
 
 ausentismo_bp = Blueprint('ausentismo', __name__)
 
@@ -282,3 +283,127 @@ def guardar_ausentismo():
     finally:
         conexion.cerrar_conexion(conn, cur)
         print("--- Conexión /guardar_ausentismo cerrada ---")
+
+# ==============================================================================
+# === RUTA PARA EL CONSOLIDADO DE AUSENTISMO (SOLO CAMBIOS EN ESTA SECCIÓN) ===
+# ==============================================================================
+@ausentismo_bp.route('/consolidado')
+def consolidado_ausentismo():
+    conn = None
+    cursor = None
+    registros_ausentismo = [] # Inicializar para asegurar que siempre se pase a la plantilla
+    page = 1
+    total_pages = 1
+    try:
+        conn = conexion.obtener_conexion()
+        if not conn:
+            print("Error: No se pudo conectar a la base de datos para el consolidado.")
+            # Pasamos valores por defecto para que la plantilla no falle
+            return render_template('consolidado_ausentismo.html', registros_para_tabla=registros_ausentismo, page=page, total_pages=total_pages, error_db="No se pudo conectar a la base de datos.")
+        
+        cursor = conn.cursor(dictionary=True)
+
+        page = request.args.get('page', 1, type=int)
+        per_page = 20 
+        offset = (page - 1) * per_page
+
+        # ===========================================================================
+        # === INICIO DEL CAMBIO: CORREGIR NOMBRE DE TABLA EN COUNT(*) ===
+        # Contar desde la tabla 'ausentismo' (singular, según tu esquema)
+        cursor.execute("SELECT COUNT(*) AS total FROM ausentismo") 
+        # === FIN DEL CAMBIO ===
+        # ===========================================================================
+        total_records_result = cursor.fetchone()
+        total_records = total_records_result['total'] if total_records_result else 0
+        total_pages = math.ceil(total_records / per_page) if total_records > 0 else 1
+        
+        # ===========================================================================
+        # === INICIO DEL CAMBIO: CONSULTA SQL TOTALMENTE REVISADA Y AJUSTADA AL ESQUEMA ===
+        # Consulta SQL para obtener los datos de ausentismo con nombres de tablas relacionadas
+        sql_consolidado_aus = """
+           SELECT
+                                
+                infosociodemografica.tipo_documento AS tipo_documento_empleado,
+                infosociodemografica.documento_identidad AS documento_identidad_empleado,
+                infosociodemografica.primer_nombre AS primer_nombre_empleado,
+                infosociodemografica.segundo_nombre AS segundo_nombre_empleado,
+                infosociodemografica.primer_apellido AS primer_apellido_empleado,
+                infosociodemografica.segundo_apellido AS segundo_apellido_empleado,
+                DATE_FORMAT(infosociodemografica.fecha_nacimiento, '%%Y-%%m-%%d') AS fecha_nacimiento_empleado_f,
+                TIMESTAMPDIFF(YEAR, infosociodemografica.fecha_nacimiento, CURDATE()) AS edad_empleado, 
+                infosociodemografica.sexo AS sexo_empleado,
+                DATE_FORMAT(infosociodemografica.fecha_ingreso_empresa, '%%Y-%%m-%%d') AS fecha_ingreso_empresa_f,
+                tipoContrato.nombre AS nombre_tipo_contrato,
+                proceso.nombre AS nombre_proceso,
+                area.nombre AS nombre_area,
+                cargo.nombre AS nombre_cargo, 
+                turnoTrabajo.nombre AS nombre_turno_trabajo,
+                DATE_FORMAT(aus.fecha_inicio, '%%Y-%%m-%%d') AS fecha_inicial_ausentismo_f,
+                DATE_FORMAT(aus.fecha_final, '%%Y-%%m-%%d') AS fecha_final_ausentismo_f,
+                
+                claseinc.nombre AS nombre_clase_incapacidad,               
+                cie_10.codigo AS codigo_diagnostico_cie10,
+                cie_10.nombre AS nombre_diagnostico,
+                cie_10.grupo AS grupo_diagnostico,
+                cie_10.segmento AS segmento_diagnostico,          
+               
+                tp.nombre AS nombre_tipo_incapacidad,
+                eps.nombre AS nombre_eps
+                
+            FROM 
+                infosociodemografica as infosociodemografica
+                INNER JOIN 
+                tipo_contrato as tipoContrato ON infosociodemografica.tipo_contrato = tipoContrato.codigo
+                INNER JOIN 
+                turno_trabajo as turnoTrabajo ON infosociodemografica.turno_trabajo = turnoTrabajo.codigo
+                INNER JOIN 
+                eps as eps ON infosociodemografica.eps = eps.codigo
+                INNER JOIN
+                cargo as cargo ON infosociodemografica.cargo = cargo.codigo
+                INNER JOIN
+                area as area ON cargo.area = area.codigo
+                INNER JOIN
+                proceso as proceso ON area.proceso = proceso.codigo
+                
+                INNER JOIN
+                ausentismo_infosociodemografica as auinfo ON infosociodemografica.documento_identidad = auinfo.infosociodemografica_docIumento_identidad
+                INNER JOIN
+                ausentismo as aus ON auinfo.codigo_ausentismo = aus.codigo
+                INNER JOIN
+                ausentismo_tipo_incapacidad as austp ON aus.codigo = austp.codigo_ausentismo
+                INNER JOIN 
+                tipo_incapacidad as tp ON austp.codigo_tipo_incapacidad = tp.codigo
+                INNER JOIN 
+                ausentismo_cie_10 as auscie10 ON aus.codigo = auscie10.codigo_ausentismo
+                INNER JOIN
+                cie_10 as cie_10 ON auscie10.cie_10 = cie_10.codigo
+                INNER JOIN
+                ausentismo_clase as ausclase ON aus.codigo = ausclase.codigo_ausentismo
+                INNER JOIN
+                clase_incapacidad as claseinc ON ausclase.codigo_clase = claseinc.codigo
+                
+                
+            LIMIT %s OFFSET %s;
+        """
+        # === FIN DEL CAMBIO EN LA CONSULTA SQL ===
+        # ===========================================================================
+        cursor.execute(sql_consolidado_aus, (per_page, offset))
+        registros_ausentismo = cursor.fetchall()
+        
+        # ==============================================================
+        # === AÑADIR ESTA LÍNEA PARA VER LOS DATOS EN LA CONSOLA ===
+        # ==============================================================
+        print("***************** DATOS DE LA CONSULTA *****************")
+        print(registros_ausentismo)
+        print("********************************************************")
+
+    except Exception as e:
+        print(f"Error al obtener datos para el consolidado de ausentismo: {e}")
+        # No sobrescribir page y total_pages aquí si ya se calcularon o se quiere mantener el error
+    finally:
+        conexion.cerrar_conexion(conn, cursor)
+
+    return render_template('consolidado_ausentismo.html',
+                           registros_para_tabla=registros_ausentismo,
+                           page=page,
+                           total_pages=total_pages)
