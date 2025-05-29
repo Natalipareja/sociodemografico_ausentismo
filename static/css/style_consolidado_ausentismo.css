@@ -1,0 +1,179 @@
+/* Importar fuentes */
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+/* -------------------------------------------------------------------------- */
+/* VARIABLES CSS GLOBALES                                                     */
+/* -------------------------------------------------------------------------- */
+:root {
+    --primary_color: #FAFEFF;
+    --second_color: #D6D6D6;
+    --third_color: #1A3863;
+    --fourth_color: #94DBED;
+    --fifth_color: #5c94b4;
+    --image-bg-color: #F8F9FA;
+    
+    --primary_font: "Poppins", sans-serif;
+    --second_font: "Comfortaa", sans-serif;
+
+    --big_font_weight: 700;
+    --medium_font_weight: 500;
+    --normal_font_weight: 400;
+    --light_font_weight: 300;
+    --thin_font_weight: 100;
+
+
+}
+
+body{
+    font-family: var(--second_font);
+}
+
+h2{
+    font-family: var(--primary_font);
+    margin-top: 20px;
+    text-align: center;
+}
+
+/* Contenedor principal para la tabla, permite el scroll horizontal y la centra */
+.table-responsive-container {
+    overflow-x: auto; /* Habilita el scroll horizontal para la tabla */
+    
+    /* --- CAMBIO PRINCIPAL AQUÍ para el ANCHO y MÁRGENES --- */
+    width: 99%;       /* Intenta ocupar casi todo el ancho que su padre le permita */
+    /* O si prefieres un margen fijo muy pequeño, por ejemplo 10px a cada lado: */
+    /* width: calc(100% - 20px); */ /* (10px a la izq + 10px a la der) */
+    
+    margin-left: auto;  /* Centra el contenedor si width es menor que el 100% del padre */
+    margin-right: auto; /* Centra el contenedor */
+    margin-top: 20px;   /* Margen superior */
+    margin-bottom: 20px;/* Margen inferior */
+    /* Si usaste width: calc(100% - 20px), podrías usar márgenes fijos: */
+    /* margin-left: 10px; */
+    /* margin-right: 10px; */
+    
+    border: 1px solid #dee2e6; /* Opcional: un borde alrededor del área de scroll */
+}
+/* Estilos base para las celdas y encabezados fijos */
+.table th,
+.table td {
+    vertical-align: middle; /* Alinea verticalmente el contenido en el medio */
+    white-space: nowrap; /* Evita que el texto se divida en múltiples líneas */
+}
+
+/* -- Inmovilizar las primeras 8 columnas -- */
+
+/* Para los encabezados (th) fijos */
+.table thead th {
+    position: -webkit-sticky; /* Para compatibilidad con Safari */
+    position: sticky;
+    top: 0; /* Fija la cabecera en la parte superior al hacer scroll vertical */
+    z-index: 2; /* Asegura que los encabezados estén sobre el contenido de las celdas */
+    /* background-color: #f8f9fa; /* Color de fondo para los encabezados, ajusta al de tu tema */
+    /* Usar variables de Bootstrap 5 para el fondo si están disponibles y son adecuadas */
+    background-color: var(--third_color);
+    color: var(--primary_color);
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    font-weight: var(--medium_font_weight, 500);
+    z-index: 3; /* z-index alto para la cabecera */
+    border-bottom: 2px solid var(--fifth_color, #5c94b4);
+    text-align: center;
+}
+
+/* Para las celdas (td) fijas y los encabezados (th) de esas columnas fijas */
+.table th:nth-child(-n+8), /* Selecciona los primeros 8 th */
+.table td:nth-child(-n+8) { /* Selecciona los primeros 8 td de cada fila */
+    position: -webkit-sticky; /* Para compatibilidad con Safari */
+    position: sticky;
+    /* background-color: #ffffff; /* Fondo para las celdas fijas. Asegúrate que sea opaco. */
+    /* Usar variables de Bootstrap 5 para el fondo si están disponibles y son adecuadas */
+        z-index: 1; /* z-index base para las celdas fijas */
+}
+
+/* Encabezados (th) de las columnas fijas necesitan un z-index mayor que los td fijos */
+.table thead th:nth-child(-n+8) {
+    z-index: 3; /* Mayor z-index para los encabezados de columnas fijas */
+}
+
+
+/* Anchos y posiciones 'left' para cada columna fija */
+/* COLUMNA 1 (#) */
+.table th:nth-child(1),
+.table td:nth-child(1) {
+    min-width: 50px; /* Ancho mínimo o fijo */
+    width: 50px;
+    left: 0px;
+}
+
+/* COLUMNA 2 (Usuario) */
+.table th:nth-child(2),
+.table td:nth-child(2) {
+    min-width: 100px;
+    width: 100px;
+    left: 50px; /* Suma del ancho de la Columna 1 */
+}
+
+/* COLUMNA 3 (Tipo Doc.) */
+.table th:nth-child(3),
+.table td:nth-child(3) {
+    min-width: 150px;
+    width: 150px;
+    left: 150px; /* 50 + 100 */
+}
+
+/* COLUMNA 4 (Documento) */
+.table th:nth-child(4),
+.table td:nth-child(4) {
+    min-width: 120px;
+    width: 120px;
+    left: 300px; /* 150 + 150 */
+}
+
+/* COLUMNA 5 (Primer Nombre) */
+.table th:nth-child(5),
+.table td:nth-child(5) {
+    min-width: 120px;
+    width: 120px;
+    left: 420px; /* 300 + 120 */
+}
+
+/* COLUMNA 6 (Segundo Nombre) */
+.table th:nth-child(6),
+.table td:nth-child(6) {
+    min-width: 120px;
+    width: 120px;
+    left: 540px; /* 420 + 120 */
+}
+
+/* COLUMNA 7 (Primer Apellido) */
+.table th:nth-child(7),
+.table td:nth-child(7) {
+    min-width: 120px;
+    width: 120px;
+    left: 660px; /* 540 + 120 */
+}
+
+/* COLUMNA 8 (Segundo Apellido) */
+.table th:nth-child(8),
+.table td:nth-child(8) {
+    min-width: 120px;
+    width: 120px;
+    left: 780px; /* 660 + 120 */
+}
+
+/* Pequeño ajuste para que el borde de las celdas fijas no se vea extraño
+   si usas 'border-collapse: collapse;' (que es el default de Bootstrap) */
+.table-responsive-container table {
+   border-collapse: separate; /* Puede ayudar con sticky, pero Bootstrap usa collapse. Prueba ambas. */
+   /* Si usas collapse, los bordes de las celdas sticky pueden necesitar un ajuste extra o no ser perfectos */
+}
+
+.active>.page-link, .page-link.active
+{
+    z-index: 3;
+    color: var(--third_color);
+    background-color: var(--fourth_color);
+    border-color: var(--fourth_color);;
+}
+

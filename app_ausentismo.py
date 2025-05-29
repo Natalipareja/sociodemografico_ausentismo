@@ -248,6 +248,9 @@ def guardar_ausentismo():
             # 2. NO se inserta/modifica infosociodemografica
 
             # 3. Insertar en tablas intermedias
+            sql_ausentismo_infosociodemografico = "INSERT INTO  ausentismo_infosociodemografica (infosociodemografica_docIumento_identidad, codigo_ausentismo) VALUES (%s, %s)"
+            cur.execute(sql_ausentismo_infosociodemografico, (documento_identidad, codigo_ausentismo))
+            
             sql_clase = "INSERT INTO ausentismo_clase (codigo_clase, codigo_ausentismo) VALUES (%s, %s)"
             cur.execute(sql_clase, (clase_incapacidad_codigo, codigo_ausentismo))
             sql_tipo = "INSERT INTO ausentismo_tipo_incapacidad (codigo_tipo_incapacidad, codigo_ausentismo) VALUES (%s, %s)"
@@ -329,17 +332,17 @@ def consolidado_ausentismo():
                 infosociodemografica.segundo_nombre AS segundo_nombre_empleado,
                 infosociodemografica.primer_apellido AS primer_apellido_empleado,
                 infosociodemografica.segundo_apellido AS segundo_apellido_empleado,
-                DATE_FORMAT(infosociodemografica.fecha_nacimiento, '%%Y-%%m-%%d') AS fecha_nacimiento_empleado_f,
+                DATE_FORMAT(infosociodemografica.fecha_nacimiento, '%Y-%m-%d') AS fecha_nacimiento_empleado_f,
                 TIMESTAMPDIFF(YEAR, infosociodemografica.fecha_nacimiento, CURDATE()) AS edad_empleado, 
                 infosociodemografica.sexo AS sexo_empleado,
-                DATE_FORMAT(infosociodemografica.fecha_ingreso_empresa, '%%Y-%%m-%%d') AS fecha_ingreso_empresa_f,
+                DATE_FORMAT(infosociodemografica.fecha_ingreso_empresa, '%Y-%m-%d') AS fecha_ingreso_empresa_f,
                 tipoContrato.nombre AS nombre_tipo_contrato,
                 proceso.nombre AS nombre_proceso,
                 area.nombre AS nombre_area,
                 cargo.nombre AS nombre_cargo, 
                 turnoTrabajo.nombre AS nombre_turno_trabajo,
-                DATE_FORMAT(aus.fecha_inicio, '%%Y-%%m-%%d') AS fecha_inicial_ausentismo_f,
-                DATE_FORMAT(aus.fecha_final, '%%Y-%%m-%%d') AS fecha_final_ausentismo_f,
+                DATE_FORMAT(aus.fecha_inicio, '%Y-%m-%d') AS fecha_inicial_ausentismo_f,
+                DATE_FORMAT(aus.fecha_final, '%Y-%m-%d') AS fecha_final_ausentismo_f,
                 
                 claseinc.nombre AS nombre_clase_incapacidad,               
                 cie_10.codigo AS codigo_diagnostico_cie10,

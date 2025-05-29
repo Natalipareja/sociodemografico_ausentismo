@@ -1,5 +1,7 @@
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, url_for
+import os
 import conexion
+import math #para la paginación
 
 sociodemografico_bp = Blueprint('sociodemografico', __name__)
 
@@ -304,7 +306,9 @@ def obtener_area_proceso():
 def consolidado_sociodemografico_tabla():
     conn = None
     cursor = None
-    registros_para_tabla = [] # Inicializa como lista vacía
+    registros_para_tabla = [] # Inicializa como lista vacía    
+    page = 1
+    total_pages = 1
 
     try:
         conn = conexion.obtener_conexion()
@@ -312,9 +316,24 @@ def consolidado_sociodemografico_tabla():
             # Manejar fallo de conexión, podrías mostrar un mensaje en la plantilla
             print("Error al conectar con la BD para el consolidado")
             # Podrías pasar un mensaje de error a la plantilla si lo deseas
-            return render_template('consolidado_sociodemografico.html', registros_para_tabla=registros_para_tabla, error_db="No se pudo conectar a la base de datos.")
+            return render_template('consolidado_sociodemografico.html', registros_para_tabla=registros_para_tabla, page=page, total_pages=total_pages, error_db="No se pudo conectar a la base de datos.")
 
         cursor = conn.cursor(dictionary=True) # Obtener resultados como diccionarios
+        
+        page = request.args.get('page', 1, type=int)
+        per_page = 20 
+        offset = (page - 1) * per_page
+        
+         # ===========================================================================
+        # === INICIO DEL CAMBIO: CORREGIR NOMBRE DE TABLA EN COUNT(*) ===
+        # Contar desde la tabla 'ausentismo' (singular, según tu esquema)
+        cursor.execute("SELECT COUNT(*) AS total FROM infosociodemografica") 
+        # === FIN DEL CAMBIO ===
+        # ===========================================================================
+        total_records_result = cursor.fetchone()
+        total_records = total_records_result['total'] if total_records_result else 0
+        total_pages = math.ceil(total_records / per_page) if total_records > 0 else 1
+        
 
         # --- COMIENZO DEL CAMBIO: MODIFICAR ESTA CONSULTA SQL ---
         # Se añaden 4 LEFT JOIN más y se cambian los campos en el SELECT
@@ -367,10 +386,12 @@ def consolidado_sociodemografico_tabla():
             LEFT JOIN afp a ON i.afp = a.codigo
             
             ORDER BY i.primer_apellido, i.primer_nombre; -- Opcional: ordenar los resultados
+            
+            LIMIT %s OFFSET %s;
         """
         # --- FIN DEL CAMBIO ---
 
-        cursor.execute(sql_consolidado)
+        cursor.execute(sql_consolidado, (per_page, offset))
         registros_para_tabla = cursor.fetchall()
 
     except Exception as e:
@@ -382,7 +403,8 @@ def consolidado_sociodemografico_tabla():
 
     # Renderizar la plantilla HTML del consolidado, pasando los datos.
     # El nombre 'consolidado_sociodemografic.html' debe coincidir con tu archivo en la carpeta 'templates'.
-    return render_template('consolidado_sociodemografico.html', registros_para_tabla=registros_para_tabla)
+    return render_template('consolidado_sociodemografico.html', registros_para_tabla=registros_para_tabla, page=page,
+                           total_pages=total_pages)
 # =================================================================================
 # ======================= FIN DE LA NUEVA RUTA ====================================
 # =================================================================================

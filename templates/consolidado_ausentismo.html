@@ -4,7 +4,7 @@
 
 {% block head_extra %}
     {# Reutilizamos el mismo CSS que el consolidado sociodemográfico para mantener el diseño #}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_consolidado_sociodemografico.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_consolidado_ausentismo.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
 {% endblock %}
 
@@ -24,27 +24,25 @@
                     <th>Sexo Empleado</th>
                     <th>Fecha Ing. Empresa</th>
                     <th>Tipo Contrato</th>
-                    <th>Cargo</th>
-                    <th>Área</th>
                     <th>Proceso</th>
+                    <th>Cargo</th>
+                    <th>Área</th>                    
                     <th>Turno Trabajo</th>
-                    <th>EPS Empleado</th>
+                    <th>Clase Incap.</th>                    
                     <th>CIE-10</th>
                     <th>Diagnóstico</th>
                     <th>Grupo Diag.</th>
-                    <th>Segmento Diag.</th>
-                    <th>Clase Incap.</th>
+                    <th>Segmento Diag.</th>                    
                     <th>Fecha Ini. Aus.</th>
                     <th>Fecha Fin Aus.</th>
                     <th>Tipo Incap.</th>
-                    <th>Fecha Registro Aus.</th>
+                    <th>EPS Empleado</th>
                 </tr>
             </thead>
             <tbody>
                 {% if registros_para_tabla %}
                     {% for registro in registros_para_tabla %}
                     <tr>
-                        <td>{{ loop.index + ((page - 1) * 20) }}</td> {# Ajusta el '20' si cambias 'per_page' #}
                         <td>{{ registro.tipo_documento_empleado | default('') }}</td>
                         <td>{{ registro.documento_identidad_empleado | default('') }}</td>
                         <td>{{ registro.primer_nombre_empleado | default('') }} {{ registro.segundo_nombre_empleado | default('') }}</td>
