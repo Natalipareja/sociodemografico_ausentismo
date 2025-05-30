@@ -258,14 +258,30 @@
         })
         .then(response => response.json())
         .then(data => {
-            if (data.mensaje) {
-                alert('Éxito: ' + data.mensaje + (data.documento ? ' - Documento: ' + data.documento : ''));
-            } else if (data.error) {
-                alert('Error: ' + data.error);
-            } else {
-                alert('Respuesta no esperada del servidor.');
-            }
-        })
+                if (data.mensaje) {
+                    alert('Éxito: ' + data.mensaje + (data.documento ? ' - Documento: ' + data.documento : ''));
+                    // ----- INICIO DEL CAMBIO -----
+                    sociodemographicForm.reset(); // Resetea todos los campos del formulario
+                    currentStep = 1; // Establece el paso actual al primero
+                    showStep(currentStep); // Muestra el primer paso del wizard
+                    // Si tienes campos que se cargan dinámicamente al inicio (como ciudades después de seleccionar departamento),
+                    // y no se resetean con form.reset(), puede que necesites resetearlos manualmente aquí también.
+                    // Por ejemplo, para el dropdown de ciudades:
+                    const ciudadDropdown = document.getElementById('ciudad');
+                    if (ciudadDropdown) { // Verificar si el elemento existe
+                        ciudadDropdown.innerHTML = '<option disabled selected value="">Seleccione una ciudad</option>';
+                    }
+                    const areaInput = document.getElementById('area');
+                    const procesoInput = document.getElementById('proceso');
+                    if (areaInput) areaInput.value = ''; // Limpiar campo área
+                    if (procesoInput) procesoInput.value = ''; // Limpiar campo proceso
+                    // ----- FIN DEL CAMBIO -----
+                } else if (data.error) {
+                    alert('Error: ' + data.error);
+                } else {
+                    alert('Respuesta no esperada del servidor.');
+                }
+            })
         .catch(error => {
             console.error('Error al enviar el formulario sociodemográfico:', error);
             alert('Error de conexión al guardar. Intente de nuevo.');
