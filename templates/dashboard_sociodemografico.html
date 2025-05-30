@@ -1,6 +1,6 @@
 {% extends "nav.html" %}
 
-{% block title %}Gráficos Información Sociodemográfica{% endblock %} {# Título más específico #}
+{% block title %}Analíticas Información Sociodemográfica{% endblock %} {# Título más específico #}
 
 {% block head_extra %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style_graficos_sociodemografico.css') }}">
@@ -9,7 +9,7 @@
 
 {% block content %}
 <div class="container-fluid py-4">
-    <h2 class="text-center mb-5">Analíticas de Información Sociodemográfica</h2>
+    <h2 class="animate__animated animate__bounceInDown dashboard-main-title">Analíticas de Información Sociodemográfica</h2>
 
     <div class="row">
         <div class="col-lg-4 col-md-6 mb-4"><div class="card chart-card"><div class="card-header">Distribución por Género</div><div class="card-body"><canvas id="graficoGenero"></canvas></div></div></div>

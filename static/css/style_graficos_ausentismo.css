@@ -1,0 +1,82 @@
+/* Importar fuentes */
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+/* -------------------------------------------------------------------------- */
+/* VARIABLES CSS GLOBALES                                                     */
+/* -------------------------------------------------------------------------- */
+:root {
+    --primary_color: #FAFEFF;
+    --second_color: #D6D6D6;
+    --third_color: #1A3863;
+    --fourth_color: #94DBED;
+    --fifth_color: #5c94b4;
+    --image-bg-color: #F8F9FA;
+    
+    --primary_font: "Poppins", sans-serif;
+    --second_font: "Comfortaa", sans-serif;
+
+    --big_font_weight: 700;
+    --medium_font_weight: 500;
+    --normal_font_weight: 400;
+    --light_font_weight: 300;
+    --thin_font_weight: 100;
+
+}
+
+body {
+    font-family: "Poppins", sans-serif;
+    background-color: var(--second_color);
+    color: #495057; /* Color de texto base */
+}
+
+h1{font-family: var(--second_font);
+}
+
+.dashboard-main-title { /* Título principal de la página del dashboard */
+    text-align: center;
+    color: #1A3863; /* Azul oscuro de tu paleta */
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 1.75rem; /* Tamaño grande para el título principal */
+    margin-top: 20px;
+    margin-bottom: 30px;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); /* Ajuste para varios gráficos */
+    gap: 25px; /* Espacio entre contenedores de gráficos */
+    padding: 0 20px 20px 20px; /* Padding alrededor de la cuadrícula */
+}
+.chart-card { /* Nuevo nombre para el contenedor, más descriptivo */
+    background-color: #FFFFFF; /* Fondo blanco puro */
+    border: 1px solid #e9ecef; /* Borde gris muy sutil */
+    border-radius: 8px; /* Esquinas redondeadas */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06); /* Sombra suave */
+    padding: 20px;
+    display: flex; /* Para controlar mejor el layout interno */
+    flex-direction: column; /* Título arriba, gráfico abajo */
+    /* height: 420px; */ /* Opcional: Altura fija si todos deben ser iguales, pero puede ser problemático con leyendas variables */
+}
+
+.chart-card-title { /* Título DENTRO de cada tarjeta de gráfico */
+    text-align: center;
+    color: #343a40; /* Un negro/gris oscuro para el título, legible */
+    font-family: "Poppins", sans-serif;
+    font-size: 0.9rem; /* Tamaño de fuente sutil para el título de la tarjeta */
+    font-weight: 600; /* Semibold */
+    margin-top: 0;
+    margin-bottom: 20px; /* Espacio entre título y el canvas */
+    line-height: 1.4;
+}
+
+.chart-canvas-container { /* Contenedor para el canvas, para manejo de tamaño/aspecto */
+    position: relative; /* Necesario para Chart.js responsive y aspect ratio */
+    flex-grow: 1; /* Permite que el gráfico ocupe el espacio restante */
+    /* min-height: 280px; */ /* Altura mínima para asegurar visibilidad */
+     /* max-height: 320px; */ /* Controla la altura máxima del área del gráfico */
+}
+
+canvas {
+    /* Chart.js maneja el tamaño del canvas dentro de su contenedor responsive */
+}

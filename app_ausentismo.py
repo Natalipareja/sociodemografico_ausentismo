@@ -410,3 +410,87 @@ def consolidado_ausentismo():
                            registros_para_tabla=registros_ausentismo,
                            page=page,
                            total_pages=total_pages)
+    
+    
+    # ==============================================================================
+# === NUEVAS RUTAS PARA EL DASHBOARD DE AUSENTISMO ===
+# ==============================================================================
+
+@ausentismo_bp.route('/dashboard_ausentismo')
+def dashboard_ausentismo_page():
+    """Sirve la página HTML del dashboard de ausentismo."""
+    print("--- Solicitud recibida en /dashboard_ausentismo ---")
+    return render_template('dashboard_ausentismo.html')
+
+@ausentismo_bp.route('/dashboard_ausentismo_datos')
+def dashboard_ausentismo_data():
+    """Provee los datos para los gráficos del dashboard de ausentismo."""
+    print("--- Solicitud recibida en /dashboard_ausentismo_datos ---")
+    conn = None
+    cursor = None
+    datos_dashboard = []
+    try:
+        conn = conexion.obtener_conexion()
+        if not conn:
+            print("Error: No se pudo conectar a la base de datos para los datos del dashboard.")
+            return jsonify({"error": "No se pudo conectar a la base de datos."}), 500
+        
+        cursor = conn.cursor(dictionary=True)
+        
+        # Usamos una consulta similar a la de 'consolidado_ausentismo' pero sin paginación
+        # y seleccionando solo los campos necesarios para los gráficos.
+        sql_dashboard_data = """
+            SELECT
+                TIMESTAMPDIFF(YEAR, infosociodemografica.fecha_nacimiento, CURDATE()) AS edad_empleado, 
+                infosociodemografica.sexo AS sexo_empleado,
+                tipoContrato.nombre AS nombre_tipo_contrato,
+                proceso.nombre AS nombre_proceso,
+                area.nombre AS nombre_area,
+                cargo.nombre AS nombre_cargo, 
+                turnoTrabajo.nombre AS nombre_turno_trabajo,
+                claseinc.nombre AS nombre_clase_incapacidad,
+                cie_10.codigo AS codigo_diagnostico_cie10,
+                cie_10.nombre AS nombre_diagnostico,
+                cie_10.grupo AS grupo_diagnostico,
+                cie_10.segmento AS segmento_diagnostico,
+                tp.nombre AS nombre_tipo_incapacidad,
+                eps.nombre AS nombre_eps
+            FROM 
+                infosociodemografica as infosociodemografica
+                INNER JOIN tipo_contrato as tipoContrato ON infosociodemografica.tipo_contrato = tipoContrato.codigo
+                INNER JOIN turno_trabajo as turnoTrabajo ON infosociodemografica.turno_trabajo = turnoTrabajo.codigo
+                INNER JOIN eps as eps ON infosociodemografica.eps = eps.codigo
+                INNER JOIN cargo as cargo ON infosociodemografica.cargo = cargo.codigo
+                INNER JOIN area as area ON cargo.area = area.codigo
+                INNER JOIN proceso as proceso ON area.proceso = proceso.codigo
+                INNER JOIN ausentismo_infosociodemografica as auinfo ON infosociodemografica.documento_identidad = auinfo.infosociodemografica_docIumento_identidad
+                INNER JOIN ausentismo as aus ON auinfo.codigo_ausentismo = aus.codigo
+                INNER JOIN ausentismo_tipo_incapacidad as austp ON aus.codigo = austp.codigo_ausentismo
+                INNER JOIN tipo_incapacidad as tp ON austp.codigo_tipo_incapacidad = tp.codigo
+                INNER JOIN ausentismo_cie_10 as auscie10 ON aus.codigo = auscie10.codigo_ausentismo
+                INNER JOIN cie_10 as cie_10 ON auscie10.cie_10 = cie_10.codigo
+                INNER JOIN ausentismo_clase as ausclase ON aus.codigo = ausclase.codigo_ausentismo
+                INNER JOIN clase_incapacidad as claseinc ON ausclase.codigo_clase = claseinc.codigo;
+            -- No hay LIMIT ni OFFSET, queremos todos los datos para los gráficos
+        """
+        cursor.execute(sql_dashboard_data)
+        datos_dashboard = cursor.fetchall()
+        
+        print(f"--- Datos para el dashboard obtenidos: {len(datos_dashboard)} registros ---")
+        return jsonify(datos_dashboard)
+
+    except mysql.connector.Error as db_err:
+        print(f"!!! Error de BD en /dashboard_ausentismo_datos: {db_err} !!!")
+        return jsonify({"error": f"Error de base de datos: {db_err.msg}"}), 500
+    except Exception as e:
+        print(f"!!! Error General en /dashboard_ausentismo_datos: {e} !!!")
+        return jsonify({"error": f"Error interno del servidor: {e}"}), 500
+    finally:
+        if conn and cursor: # Asegurarse que conn y cursor no son None
+            conexion.cerrar_conexion(conn, cursor)
+        print("--- Conexión /dashboard_ausentismo_datos cerrada ---")
+
+
+# --- Asegúrate que tu Blueprint está registrado en tu app principal (app.py o __init__.py) ---
+# from .ausentismo import ausentismo_bp # Ejemplo si ausentismo_bp.py está en un subdirectorio
+# app.register_blueprint(ausentismo_bp, url_prefix='/ausentismo')

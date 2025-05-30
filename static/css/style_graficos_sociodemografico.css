@@ -23,6 +23,11 @@
 
 
 }
+
+h2{
+    text-align: center;
+    font-family: var(--primary_font);
+}
 .chart-card {
     display: flex;
     flex-direction: column;
