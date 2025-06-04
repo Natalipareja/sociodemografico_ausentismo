@@ -4,7 +4,8 @@
 
 {% block head_extra %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style_graficos_sociodemografico.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">    
+    
 {% endblock %}
 
 {% block content %}
@@ -52,69 +53,174 @@
 {% block scripts %}
     {{ super() }}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            
-            // Colores base para los gráficos, puedes usar los de tus variables CSS
-            const colorPrincipal = 'rgba(26, 56, 99, 0.7)'; // --third_color
-            const colorSecundario = 'rgba(148, 219, 237, 0.7)'; // --fourth_color
-            const coloresPie = [colorPrincipal, colorSecundario, 'rgba(92, 148, 180, 0.7)', 'rgba(214, 214, 214, 0.7)'];
+   <script>
+    document.addEventListener('DOMContentLoaded', function () {
 
-            // Función genérica para crear gráficos de barras
-            function crearGraficoBarra(idCanvas, datos, campoLabel, titulo, esHorizontal = false, color = colorPrincipal) {
-                const ctx = document.getElementById(idCanvas).getContext('2d');
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: datos.map(d => d[campoLabel]),
-                        datasets: [{ label: titulo, data: datos.map(d => d.total), backgroundColor: color }]
+        // --- 1. LEER LAS VARIABLES CSS ---
+        const rootStyles = getComputedStyle(document.documentElement);
+        const primaryColorCSS = rootStyles.getPropertyValue('--primary_color').trim(); // #FAFEFF (muy claro)
+        const secondColorCSS = rootStyles.getPropertyValue('--second_color').trim();  // #D6D6D6 (gris claro)
+        const thirdColorCSS = rootStyles.getPropertyValue('--third_color').trim();   // #1A3863 (azul oscuro)
+        const fourthColorCSS = rootStyles.getPropertyValue('--fourth_color').trim(); // #94DBED (azul claro)
+        const fifthColorCSS = rootStyles.getPropertyValue('--fifth_color').trim();   // #5c94b4 (azul medio)
+        // const imageBgColorCSS = rootStyles.getPropertyValue('--image-bg-color').trim(); // #F8F9FA
+
+        // --- 2. ASIGNAR COLORES A LAS CONSTANTES DEL SCRIPT ---
+        // Usaremos los colores más adecuados para visualización de datos.
+        const colorPrincipal = thirdColorCSS;   // Azul oscuro para barras principales
+        const colorSecundario = fifthColorCSS;  // Azul medio para barras secundarias o alternativas
+        const coloresPie = [
+            thirdColorCSS,   // Azul oscuro
+            fourthColorCSS,  // Azul claro
+            fifthColorCSS,   // Azul medio
+            secondColorCSS,  // Gris claro (puede necesitar texto oscuro para datalabels si se usa en pie)
+            // Puedes añadir más si es necesario, o crear variaciones si tienes pocas opciones vibrantes
+            // Por ejemplo, podrías tener una función que aclare u oscurezca ligeramente un color base.
+        ];
+        // Color para texto de datalabels que contraste con colorPrincipal (azul oscuro)
+        const datalabelColorPrincipalContraste = primaryColorCSS; // Blanco
+        // Color para texto de datalabels que contraste con colorSecundario (azul medio)
+        const datalabelColorSecundarioContraste = primaryColorCSS; // Blanco
+        // Color para texto de datalabels para el azul claro (fourthColorCSS) o gris claro (secondColorCSS)
+        const datalabelColorClaroContraste = thirdColorCSS; // Azul oscuro
+
+
+        // Registrar el plugin ChartDataLabels
+        if (typeof Chart !== 'undefined' && typeof ChartDataLabels !== 'undefined') {
+            Chart.register(ChartDataLabels);
+        } else {
+            console.error('Error: Chart.js o ChartDataLabels no están definidos...');
+        }
+
+        // Función genérica para crear gráficos de barras
+        function crearGraficoBarra(idCanvas, datos, campoLabel, titulo, esHorizontal = false, colorDataset = colorPrincipal) {
+            const ctx = document.getElementById(idCanvas).getContext('2d');
+
+            // Determinar el color del datalabel basado en el color del dataset
+            let colorDeEtiqueta;
+            if (colorDataset === thirdColorCSS || colorDataset === fifthColorCSS) { // Si es azul oscuro o medio
+                colorDeEtiqueta = datalabelColorPrincipalContraste; // Texto blanco/claro
+            } else if (colorDataset === fourthColorCSS || colorDataset === secondColorCSS) { // Si es azul claro o gris claro
+                colorDeEtiqueta = datalabelColorClaroContraste; // Texto oscuro
+            } else {
+                colorDeEtiqueta = '#000000'; // Default a negro si no coincide
+            }
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: datos.map(d => d[campoLabel]),
+                    datasets: [{
+                        label: titulo,
+                        data: datos.map(d => d.total),
+                        backgroundColor: colorDataset // Usar el color del dataset pasado como argumento
+                    }]
+                },
+                options: {
+                    indexAxis: esHorizontal ? 'y' : 'x',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: {
+                            display: true,
+                            color: colorDeEtiqueta, // Color de etiqueta dinámico
+                            anchor: esHorizontal ? 'start' : 'end',
+                            align: esHorizontal ? 'start' : 'top',
+                            font: { weight: 'bold' },
+                            formatter: function(value) { return value > 0 ? value : ''; },
+                            offset: esHorizontal ? 8 : 4,
+                            padding: 0
+                        }
                     },
-                    options: {
-                        indexAxis: esHorizontal ? 'y' : 'x',
-                        responsive: true, maintainAspectRatio: false,
-                        plugins: { legend: { display: false } }
+                    scales: {
+                        x: { beginAtZero: !esHorizontal, ticks: { color: fifthColorCSS }, grid: { color: secondColorCSS } },
+                        y: { beginAtZero: esHorizontal, ticks: { color: fifthColorCSS }, grid: { color: secondColorCSS } }
                     }
-                });
-            }
+                }
+            });
+        }
 
-            // Función genérica para crear gráficos de torta/dona
-            function crearGraficoPie(idCanvas, datos, campoLabel, titulo) {
-                 const ctx = document.getElementById(idCanvas).getContext('2d');
-                 new Chart(ctx, {
-                    type: 'pie',
-                    data: {
-                        labels: datos.map(d => d[campoLabel]),
-                        datasets: [{ label: titulo, data: datos.map(d => d.total), backgroundColor: coloresPie }]
-                    },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
-                 });
-            }
+        // Función genérica para crear gráficos de torta/dona
+        function crearGraficoPie(idCanvas, datos, campoLabel, titulo) {
+            const ctx = document.getElementById(idCanvas).getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: datos.map(d => d[campoLabel]),
+                    datasets: [{
+                        label: titulo,
+                        data: datos.map(d => d.total),
+                        backgroundColor: coloresPie // Array de colores definido arriba
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right', labels: { color: thirdColorCSS } },
+                        datalabels: {
+                            display: true,
+                            formatter: (value, ctx) => {
+                                let sum = 0;
+                                let dataArr = ctx.chart.data.datasets[0].data;
+                                dataArr.map(data => { sum += data; });
+                                if (sum === 0) return '0%';
+                                let percentage = (value * 100 / sum).toFixed(1) + "%";
+                                return percentage;
+                            },
+                            // El color aquí es más complejo porque cada slice tiene un color diferente.
+                            // Una solución simple es usar un color que contraste con la mayoría,
+                            // o puedes hacer una lógica más compleja en el `color` callback del datalabel.
+                            color: function(context) {
+                                // Lógica simple: si el color del segmento es muy claro, usa texto oscuro, sino texto claro.
+                                const bgColor = context.dataset.backgroundColor[context.dataIndex];
+                                // Aquí necesitarías una función para determinar si bgColor es "claro" u "oscuro"
+                                // Por simplicidad, si es el azul claro o gris claro, usamos texto oscuro.
+                                if (bgColor === fourthColorCSS || bgColor === secondColorCSS) {
+                                    return thirdColorCSS; // Texto oscuro
+                                }
+                                return primaryColorCSS; // Texto blanco/claro para los demás
+                            },
+                            font: { weight: 'bold', size: 12 }
+                        }
+                    }
+                }
+            });
+        }
 
-            // Pedimos todos los datos a nuestra API de una sola vez
-            fetch("{{ url_for('sociodemografico.dashboard_data') }}")
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) throw new Error(data.error);
+        // Pedimos todos los datos a nuestra API
+        fetch("{{ url_for('sociodemografico.dashboard_data') }}")
+            .then(response => {
+                if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                if (data.error) {
+                    console.error('Error desde la API:', data.error);
+                    throw new Error(data.error);
+                }
 
-                    // Llamamos a las funciones para crear cada gráfico con los datos recibidos
-                    crearGraficoPie('graficoGenero', data.genero, 'sexo', 'Género');
-                    crearGraficoPie('graficoEstadoCivil', data.estado_civil, 'estado_civil', 'Estado Civil');
-                    crearGraficoPie('graficoCabezaHogar', data.cabeza_hogar, 'cabeza_hogar', 'Cabeza de Hogar');
-                    crearGraficoPie('graficoVivienda', data.vivienda, 'tipo_vivienda', 'Tipo de Vivienda');
-                    
-                    crearGraficoBarra('graficoEdad', data.edad, 'rango_edad', 'Rango de Edad');
-                    crearGraficoBarra('graficoEscolaridad', data.escolaridad, 'nivel_escolaridad', 'Nivel de Escolaridad', true, colorSecundario);
-                    crearGraficoBarra('graficoHijos', data.hijos, 'hijos', 'Número de Hijos');
-                    crearGraficoBarra('graficoEstrato', data.estrato, 'estrato', 'Estrato');
-                    crearGraficoBarra('graficoVinculacion', data.vinculacion, 'tipo_contrato', 'Tipo de Vinculación', true, colorSecundario);
-                    crearGraficoBarra('graficoProceso', data.proceso, 'proceso', 'Procesos', true);
-                    crearGraficoBarra('graficoArea', data.area, 'area', 'Áreas', true, colorSecundario);
-                    crearGraficoBarra('graficoResidencia', data.residencia, 'ciudad', 'Ciudades', true);
-                    crearGraficoBarra('graficoEps', data.eps, 'eps', 'EPS', true, colorSecundario);
-                    crearGraficoBarra('graficoAfp', data.afp, 'afp', 'AFP', true);
-                })
-                .catch(error => console.error('Error al cargar datos para los gráficos:', error));
-        });
-    </script>
+                // Crear gráficos (pasando el color secundario explícitamente donde se usaba antes)
+                if (data.genero) crearGraficoPie('graficoGenero', data.genero, 'sexo', 'Género');
+                if (data.estado_civil) crearGraficoPie('graficoEstadoCivil', data.estado_civil, 'estado_civil', 'Estado Civil');
+                if (data.cabeza_hogar) crearGraficoPie('graficoCabezaHogar', data.cabeza_hogar, 'cabeza_hogar', 'Cabeza de Hogar');
+                if (data.vivienda) crearGraficoPie('graficoVivienda', data.vivienda, 'tipo_vivienda', 'Tipo de Vivienda');
+
+                if (data.edad) crearGraficoBarra('graficoEdad', data.edad, 'rango_edad', 'Rango de Edad'); // Usa colorPrincipal (thirdColorCSS) por defecto
+                if (data.escolaridad) crearGraficoBarra('graficoEscolaridad', data.escolaridad, 'nivel_escolaridad', 'Nivel de Escolaridad', true, colorSecundario); // Usa colorSecundario (fifthColorCSS)
+                if (data.hijos) crearGraficoBarra('graficoHijos', data.hijos, 'hijos', 'Número de Hijos');
+                if (data.estrato) crearGraficoBarra('graficoEstrato', data.estrato, 'estrato', 'Estrato');
+                if (data.vinculacion) crearGraficoBarra('graficoVinculacion', data.vinculacion, 'tipo_contrato', 'Tipo de Vinculación', true, colorSecundario);
+                if (data.proceso) crearGraficoBarra('graficoProceso', data.proceso, 'proceso', 'Procesos', true);
+                if (data.area) crearGraficoBarra('graficoArea', data.area, 'area', 'Áreas', true, colorSecundario);
+                if (data.residencia) crearGraficoBarra('graficoResidencia', data.residencia, 'ciudad', 'Ciudades', true);
+                if (data.eps) crearGraficoBarra('graficoEps', data.eps, 'eps', 'EPS', true, colorSecundario);
+                if (data.afp) crearGraficoBarra('graficoAfp', data.afp, 'afp', 'AFP', true);
+            })
+            .catch(error => console.error('Error al cargar o procesar datos para los gráficos:', error));
+    });
+</script>
 {% endblock %}

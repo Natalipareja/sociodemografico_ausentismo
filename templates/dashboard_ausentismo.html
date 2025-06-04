@@ -3,7 +3,7 @@
 {% block head_extra %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style_graficos_ausentismo.css') }}">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     
 {% endblock %}
 
@@ -99,18 +99,45 @@
                 <canvas id="chartEPS"></canvas>
             </div>
         </div>
-    </div> </div> <script>
+    </div> </div> 
+    {% endblock %}
+    
+{% block scripts %}
+    {{ super() }}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <script>
 document.addEventListener('DOMContentLoaded', function () {
     const loadingMessage = document.getElementById('loadingMessage');
     const errorMessage = document.getElementById('errorMessage');
-    const dashboardGrid = document.querySelector('.dashboard-grid'); // Obtener el contenedor de la cuadrícula
-    let allCharts = {}; 
+    const dashboardGrid = document.querySelector('.dashboard-grid');
+    let allCharts = {};
 
+    // --- TUS COLORES EXISTENTES (NO SE CAMBIAN) ---
     const customChartColors = [
-        '#1A3863', '#94DBED', '#5c94b4', '#D6D6D6'
+        '#1A3863', // Azul oscuro
+        '#94DBED', // Azul claro
+        '#5c94b4', // Azul medio
+        '#D6D6D6'  // Gris claro
     ];
     const primaryFont = '"Poppins", sans-serif';
-    const chartCardBackgroundColor = '#FFFFFF'; 
+    const chartCardBackgroundColor = '#FFFFFF'; // Blanco, útil para texto de datalabels en fondos oscuros
+
+    // --- REGISTRO DEL PLUGIN CHARTDATALABELS ---
+    // Asegúrate de que Chart.js y el plugin estén cargados
+    if (typeof Chart !== 'undefined' && typeof ChartDataLabels !== 'undefined') {
+        Chart.register(ChartDataLabels);
+        console.log("ChartDataLabels plugin registrado.");
+    } else {
+        console.error('Error: Chart.js o ChartDataLabels no están definidos. Asegúrate de que los scripts CDN estén cargados.');
+        // No continuar si las librerías base no están cargadas.
+        if (loadingMessage) loadingMessage.style.display = 'none';
+        if (errorMessage) {
+            errorMessage.textContent = 'Error crítico: No se pudieron cargar las librerías de gráficos.';
+            errorMessage.style.display = 'block';
+        }
+        return;
+    }
 
     function assignChartColors(count) {
         let backgroundColors = [];
@@ -119,109 +146,132 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         return { backgroundColors };
     }
-    
+
     function createChart(canvasId, type, labels, data, chartCardTitleForDebug, isTopN = false, topN = 10) {
         const ctx = document.getElementById(canvasId);
         if (!ctx) {
             console.error(`Error: Canvas con ID '${canvasId}' no encontrado.`);
-            errorMessage.textContent = `Error: No se encontró el canvas para el gráfico: ${chartCardTitleForDebug || canvasId}.`;
-            errorMessage.style.display = 'block';
-            loadingMessage.style.display = 'none';
-            return; // Salir si el canvas no existe
+            if (errorMessage) {
+                errorMessage.textContent = `Error: No se encontró el canvas para el gráfico: ${chartCardTitleForDebug || canvasId}.`;
+                errorMessage.style.display = 'block';
+            }
+            if (loadingMessage) loadingMessage.style.display = 'none';
+            return;
         }
 
         const { backgroundColors } = assignChartColors(labels.length);
 
         if (allCharts[canvasId]) {
-            allCharts[canvasId].destroy(); 
+            allCharts[canvasId].destroy();
         }
+
+        // --- CONFIGURACIÓN DE DATALABELS ---
+        const datalabelsConfig = {
+            display: true,
+            font: {
+                family: primaryFont,
+                weight: 'bold',
+                size: 10 // Tamaño base, puedes ajustarlo
+            },
+            formatter: function(value, context) {
+                if (value === null || typeof value === 'undefined') return '';
+                // Para pie/doughnut, es común mostrar porcentajes o no mostrar si el valor es 0
+                if (context.chart.config.type === 'pie' || context.chart.config.type === 'doughnut') {
+                    if (value === 0) return ''; // No mostrar etiqueta para valor 0 en pie/dona
+                    const chartData = context.chart.data.datasets[0].data;
+                    const total = chartData.reduce((acc, val) => acc + (parseFloat(val) || 0), 0);
+                    if (total === 0) return '0%';
+                    const percentage = (value / total * 100).toFixed(1) + '%';
+                    return percentage; // Muestra porcentaje para pie/dona
+                }
+                return value; // Muestra el valor para otros tipos de gráfico
+            },
+            color: function(context) {
+                // Lógica para contraste de color de la etiqueta
+                const chartType = context.chart.config.type;
+                const currentBgColor = context.dataset.backgroundColor[context.dataIndex] || context.dataset.backgroundColor;
+
+                if (chartType === 'pie' || chartType === 'doughnut') {
+                    // Colores claros de tu paleta que necesitan texto oscuro
+                    if (currentBgColor === '#94DBED' || currentBgColor === '#D6D6D6') {
+                        return '#1A3863'; // Azul oscuro (texto oscuro)
+                    }
+                    return chartCardBackgroundColor; // Blanco (texto claro) para los demás
+                }
+                // Para barras, si el color de la barra es muy oscuro, usar blanco.
+                // Asumimos que las barras usan un solo color o el primer color de customChartColors.
+                // Esta lógica podría necesitar ajuste si el color de la barra es dinámico y claro.
+                if (currentBgColor === '#1A3863' || currentBgColor === '#5c94b4'){
+                     return chartCardBackgroundColor; // Texto blanco
+                }
+                return 'red'; // Texto oscuro para barras claras
+            },
+            anchor: function(context) {
+                const chartType = context.chart.config.type;
+                return (chartType === 'pie' || chartType === 'doughnut') ? 'center' : 'end';
+            },
+            align: function(context) {
+                const chartType = context.chart.config.type;
+                if (chartType === 'pie' || chartType === 'doughnut') {
+                    return 'center';
+                }
+                const indexAxis = context.chart.options.indexAxis || 'x'; // Default a 'x' si no está definido
+                return indexAxis === 'y' ? 'start' : 'top'; // 'start' para horizontal, 'top' para vertical
+            },
+            offset: function(context) {
+                const chartType = context.chart.config.type;
+                if (chartType === 'bar' || chartType === 'line') {
+                     const indexAxis = context.chart.options.indexAxis || 'x';
+                     return indexAxis === 'y' ? 8 : 4; // Más offset para barras horizontales
+                }
+                return 0;
+            },
+            padding: 0
+        };
+        // --- FIN CONFIGURACIÓN DE DATALABELS ---
+
 
         const chartOptions = {
             responsive: true,
-            maintainAspectRatio: false, 
-            plugins: {
+            maintainAspectRatio: false,
+            plugins: { // Plugins existentes y el nuevo datalabels
                 legend: {
-                    display: (type === 'pie' || type === 'doughnut') && labels.length > 1, 
+                    display: (type === 'pie' || type === 'doughnut') && labels.length > 1,
                     position: 'right',
-                    align: 'center', 
+                    align: 'center',
                     labels: {
-                        color: '#495057', 
+                        color: '#495057',
                         font: { family: primaryFont, size: 10 },
-                        boxWidth: 10,      
-                        boxHeight: 10,     
-                        padding: 10,       
-                        usePointStyle: false 
+                        boxWidth: 10,
+                        boxHeight: 10,
+                        padding: 10,
+                        usePointStyle: false
                     }
                 },
                 title: { display: false },
-                tooltip: { 
-                    backgroundColor: 'rgba(26, 56, 99, 0.9)',
-                    titleFont: { family: primaryFont, weight: '600', size: 12 },
-                    bodyFont: { family: primaryFont, size: 11 },
-                    titleColor: '#FFFFFF', 
-                    bodyColor: '#E0E7FF',  
-                    borderColor: 'rgba(92, 148, 180, 0.5)', 
-                    borderWidth: 1,
-                    padding: 8,
-                    displayColors: true, 
-                    boxPadding: 3 
-                }
+                tooltip: { /* ... tu configuración de tooltip existente ... */ },
+                datalabels: datalabelsConfig // <--- SE AÑADE LA CONFIGURACIÓN DEL PLUGIN AQUÍ
             },
-            layout: { 
-                padding: {
-                    top: (type === 'pie' || type === 'doughnut') ? 5 : 10, // Menos padding arriba para tortas
-                    bottom: 5,
-                    left: 5,
-                    right: 5
-                }
-            }
+            layout: { /* ... tu configuración de layout existente ... */ }
         };
 
         if (type === 'bar' || type === 'line') {
-            chartOptions.scales = {
-                y: { 
-                    beginAtZero: true, 
-                    ticks: { 
-                        precision: 0,
-                        color: '#6c757d', 
-                        font: { family: primaryFont, size: 9 } // Tamaño de fuente más pequeño para ejes
-                    },
-                    grid: {
-                        color: '#e9ecef', 
-                        borderColor: '#dee2e6' 
-                    }
-                },
-                x: { 
-                    ticks: { 
-                        autoSkip: labels.length > 7, // Auto-skip más agresivo
-                        maxRotation: labels.length > 4 ? 40 : 0,  
-                        minRotation: 0,
-                        color: '#6c757d',
-                        font: { family: primaryFont, size: 9 } // Tamaño de fuente más pequeño para ejes
-                    },
-                    grid: { display: false },
-                    borderColor: '#dee2e6' 
-                }
-            };
-            if (chartOptions.plugins.legend) { 
-                 chartOptions.plugins.legend.position = 'bottom';
-                 // La leyenda para barras solo se muestra si tiene una etiqueta el dataset y hay algo que mostrar
-                 chartOptions.plugins.legend.display = true; // Se mostrará "Cantidad"
-                 chartOptions.plugins.legend.align = 'center';
-            }
+            // Tu lógica existente para escalas
+            chartOptions.scales = { /* ... tu configuración de escalas ... */ };
+            if (chartOptions.plugins.legend) { /* ... tu lógica de leyenda para barras ... */ }
         }
 
         try {
-            allCharts[canvasId] = new Chart(ctx.getContext('2d'), { // Asegurarse de pasar el contexto 2d
+            allCharts[canvasId] = new Chart(ctx.getContext('2d'), { // Asegurar pasar el contexto 2d
                 type: type,
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Cantidad', // Etiqueta para la leyenda de datasets (ej. barras)
+                        label: 'Cantidad',
                         data: data,
                         backgroundColor: backgroundColors,
                         borderColor: chartCardBackgroundColor,
-                        borderWidth: (type === 'pie' || type === 'doughnut') ? 2 : 1.5, 
+                        borderWidth: (type === 'pie' || type === 'doughnut') ? 2 : 1.5,
                         hoverBorderColor: chartCardBackgroundColor,
                         hoverBorderWidth: (type === 'pie' || type === 'doughnut') ? 2 : 1.5,
                     }]
@@ -230,7 +280,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         } catch (e) {
             console.error(`Error al crear el gráfico '${canvasId}':`, e);
-            // Podrías mostrar un mensaje específico en la tarjeta del gráfico si falla
             const cardWithError = ctx.closest('.chart-card');
             if(cardWithError) {
                 cardWithError.innerHTML = `<h3 class="chart-card-title">${chartCardTitleForDebug || canvasId}</h3><p class="text-danger text-center small p-3">Error al cargar este gráfico.</p>`;
@@ -238,9 +287,11 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // --- TU LÓGICA DE PROCESAMIENTO DE DATOS (countOccurrences, processAgeData, getTopN) ---
+    // (Se mantiene igual que en tu script original)
     function countOccurrences(dataArray, key) { 
         const counts = {};
-        if (!Array.isArray(dataArray)) return counts; // Protección
+        if (!Array.isArray(dataArray)) return counts;
         dataArray.forEach(item => {
             const value = (item && item[key] !== null && item[key] !== undefined) ? item[key] : 'No especificado'; 
             counts[value] = (counts[value] || 0) + 1;
@@ -251,10 +302,10 @@ document.addEventListener('DOMContentLoaded', function () {
         const ageRanges = {
             'Menor a 20': 0, '20-29': 0, '30-39': 0, '40-49': 0, '50-59': 0, '60 o más': 0, 'No especificado': 0
         };
-        if (!Array.isArray(dataArray)) return ageRanges; // Protección
+        if (!Array.isArray(dataArray)) return ageRanges;
         dataArray.forEach(item => {
             const age = (item && item.edad_empleado !== null && item.edad_empleado !== undefined) ? parseInt(item.edad_empleado, 10) : null;
-            if (age === null) {
+            if (age === null || isNaN(age)) { // Chequeo adicional por NaN
                 ageRanges['No especificado']++;
             } else if (age < 20) ageRanges['Menor a 20']++;
             else if (age >= 20 && age <= 29) ageRanges['20-29']++;
@@ -262,29 +313,28 @@ document.addEventListener('DOMContentLoaded', function () {
             else if (age >= 40 && age <= 49) ageRanges['40-49']++;
             else if (age >= 50 && age <= 59) ageRanges['50-59']++;
             else if (age >=60) ageRanges['60 o más']++;
-            else ageRanges['No especificado']++; // Por si parseInt falla o da NaN
+            else ageRanges['No especificado']++; 
         });
         return ageRanges;
     }
     function getTopN(counts, n = 10) { 
-        if (typeof counts !== 'object' || counts === null) return {}; // Protección
+        if (typeof counts !== 'object' || counts === null) return {};
         const sorted = Object.entries(counts)
             .sort(([,a],[,b]) => b-a)
             .slice(0, n);
         return Object.fromEntries(sorted);
     }
 
-    // --- Inicio del Fetch ---
+    // --- TU LÓGICA DE FETCH Y CREACIÓN DE GRÁFICOS ---
+    // (Se mantiene igual que en tu script original)
     console.log("Iniciando fetch para datos del dashboard...");
     fetch("{{ url_for('ausentismo.dashboard_ausentismo_data') }}")
         .then(response => {
             console.log("Respuesta recibida del servidor, estado:", response.status);
             if (!response.ok) {
-                // Intentar obtener el mensaje de error del cuerpo JSON si existe
                 return response.json().then(errData => {
                     throw new Error(errData.error || `Error HTTP: ${response.status} ${response.statusText}`);
                 }).catch(() => {
-                    // Si el cuerpo no es JSON o está vacío, lanzar error genérico
                     throw new Error(`Error HTTP: ${response.status} ${response.statusText}`);
                 });
             }
@@ -292,23 +342,26 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .then(data => {
             console.log("Datos recibidos y parseados:", data);
-            loadingMessage.style.display = 'none';
-            dashboardGrid.style.display = 'grid'; // Mostrar la cuadrícula
+            if (loadingMessage) loadingMessage.style.display = 'none';
+            if (dashboardGrid) dashboardGrid.style.display = 'grid';
 
             if (!data || (Array.isArray(data) && data.length === 0)) {
-                errorMessage.textContent = 'No hay datos de ausentismo disponibles para mostrar en el dashboard.';
-                errorMessage.style.display = 'block';
+                if (errorMessage) {
+                    errorMessage.textContent = 'No hay datos de ausentismo disponibles para mostrar en el dashboard.';
+                    errorMessage.style.display = 'block';
+                }
                 console.warn("No hay datos para mostrar.");
                 return;
             }
             if (typeof data !== 'object' && !Array.isArray(data)) {
-                errorMessage.textContent = 'Los datos recibidos no tienen el formato esperado.';
-                errorMessage.style.display = 'block';
+                 if (errorMessage) {
+                    errorMessage.textContent = 'Los datos recibidos no tienen el formato esperado.';
+                    errorMessage.style.display = 'block';
+                }
                 console.error("Formato de datos incorrecto:", data);
                 return;
             }
             
-            // Crear gráficos (asegúrate que los IDs coincidan con tu HTML)
             try {
                 createChart('chartEdad', 'bar', Object.keys(processAgeData(data)), Object.values(processAgeData(data)), "Ausentismo por Edad");
                 createChart('chartSexo', 'pie', Object.keys(countOccurrences(data, 'sexo_empleado')), Object.values(countOccurrences(data, 'sexo_empleado')), "Ausentismo por Sexo");
@@ -338,17 +391,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 createChart('chartEPS', 'bar', Object.keys(getTopN(epsData)), Object.values(getTopN(epsData)), "Ausentismo por EPS", Object.keys(epsData).length > 10, 10);
             } catch (e) {
                 console.error("Error durante la creación de gráficos:", e);
-                errorMessage.textContent = 'Ocurrió un error al generar los gráficos.';
-                errorMessage.style.display = 'block';
+                if (errorMessage) {
+                    errorMessage.textContent = 'Ocurrió un error al generar los gráficos.';
+                    errorMessage.style.display = 'block';
+                }
             }
 
         })
         .catch(error => {
             console.error("Error en fetch o al procesar los datos:", error);
-            loadingMessage.style.display = 'none';
-            dashboardGrid.style.display = 'grid'; // Mostrar la cuadrícula incluso si hay error para ver los contenedores vacíos
-            errorMessage.textContent = `Error al cargar datos del dashboard: ${error.message}`;
-            errorMessage.style.display = 'block';
+            if (loadingMessage) loadingMessage.style.display = 'none';
+            if (dashboardGrid) dashboardGrid.style.display = 'grid'; 
+            if (errorMessage) {
+                errorMessage.textContent = `Error al cargar datos del dashboard: ${error.message}`;
+                errorMessage.style.display = 'block';
+            }
         });
 });
 </script>

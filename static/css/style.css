@@ -35,8 +35,10 @@
 /* --- Estilos Base y Body --- */
 html { height: 100%; }
 body {
-    margin: 0; padding: 0; min-height: 100vh;
-    background: url('img/inicio.jpg') no-repeat center center fixed; /* TU RUTA */
+    margin: 0; 
+    padding: 0; 
+    min-height: 100vh;
+    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('img/inicio.jpg') no-repeat center center fixed; /* TU RUTA */
     background-size: cover; background-color: var(--second_color);
     font-family: var(--primary_font); font-weight: var(--normal_font);
     display: flex; flex-direction: column; color: var(--login-text-color);
