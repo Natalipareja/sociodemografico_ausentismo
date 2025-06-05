@@ -80,3 +80,70 @@ h1{font-family: var(--second_font);
 canvas {
     /* Chart.js maneja el tamaño del canvas dentro de su contenedor responsive */
 }
+
+
+
+#filtrosContenedorDashboard {
+    background-color: #fff; /* O el color que tenías, ej: #fdfdfd */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin-bottom: 25px;
+    /* Ya no necesitamos text-align: center aquí para las columnas */
+}
+
+#filtrosContenedorDashboard h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.25rem;
+    color: #333;
+    text-align: center; /* El título se mantiene centrado */
+}
+
+/* === ESTILOS CLAVE PARA CENTRAR CON FLEXBOX === */
+.filtros-flex-wrapper {
+    display: flex;            /* Activa Flexbox */
+    justify-content: center;  /* **CENTRA HORIZONTALMENTE** las columnas hijas */
+    flex-wrap: wrap;          /* Permite que las columnas pasen abajo si no hay espacio (opcional) */
+    gap: 20px;                /* Espacio entre las columnas (reemplaza márgenes laterales en .filter-column) */
+                               /* Si solo quieres espacio horizontal: gap: 0 20px; */
+}
+
+/* Estilo para cada columna individual de filtros */
+.filter-column {
+    /* display: inline-block; Ya no es necesario, son items flex */
+    /* vertical-align: top; Ya no es necesario */
+    text-align: left;       /* Contenido DENTRO de la columna a la izquierda */
+    /* padding: 0 15px; El 'gap' en el wrapper maneja el espaciado entre columnas */
+    min-width: 200px;       /* O el ancho que prefieras para cada columna */
+    /* width: 230px; Si prefieres un ancho fijo por columna */
+}
+/* ============================================ */
+
+#filtrosContenedorDashboard label {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    font-weight: normal;
+    cursor: pointer;
+    color: #555;
+}
+
+#filtrosContenedorDashboard input[type="checkbox"] {
+    margin-right: 10px;
+    transform: scale(1.1);
+    accent-color: #1A3863;
+}
+
+/* Opcional: para pantallas más pequeñas, podrías querer que las columnas ocupen todo el ancho */
+@media (max-width: 768px) {
+    .filtros-flex-wrapper {
+        flex-direction: column; /* Apila las columnas verticalmente */
+        align-items: center;    /* Centra las columnas apiladas (si tienen un ancho menor al wrapper) */
+    }
+    .filter-column {
+        width: 100%; /* O un max-width apropiado */
+        max-width: 300px; /* Ejemplo */
+        margin-bottom: 15px; /* Espacio entre columnas cuando están apiladas */
+    }
+}
