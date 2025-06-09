@@ -76,7 +76,9 @@ body {
     background-color: transparent; /* Fondo base transparente */
     transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, opacity 0.2s ease-in-out;
 }
-
+.nav-item{
+    color:var(--third_color)
+}
 .nav-item:hover{
     color: #5c94b4;
 }
@@ -249,7 +251,11 @@ main.content-area h2 {
     margin: 0;
 }
 
+li{
+    color: var(--primary_color);
+    font-family: var(--primary_font);
 
+}
 
 
 /* --- Footer --- */

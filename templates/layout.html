@@ -24,37 +24,7 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                         {% if session.get('user_logged_in') %}
-                            <li class="nav-item">
-                                <a class="nav-link active" aria-current="page" href="{{ url_for('sociodemografico.intro') }}">Inicio</a>
-                            </li>
-
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    Información Sociodemográfica
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="{{ url_for('sociodemografico.formulario_sociodemografico') }}">Registro</a></li>
-                                    <li><a class="dropdown-item" href="{{ url_for('sociodemografico.consolidado_sociodemografico_tabla') }}">Consolidado</a></li>
-                                    <li><a class="dropdown-item" href="{{ url_for('sociodemografico.dashboard') }}">Analíticas </a></li>
-                                </ul>
-                            </li>
-
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    Ausentismo
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="{{ url_for('ausentismo.formulario_ausentismo') }}">Registro</a></li>
-                                    <li><a class="dropdown-item" href="{{ url_for('ausentismo.consolidado_ausentismo') }}">Consolidado</a></li>
-                                    <li><a class="dropdown-item" href="{{ url_for('ausentismo.dashboard_ausentismo_page') }}">Analíticas</a></li>
-                                </ul>
-                            </li>
-                            
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('auth.logout') }}">Cerrar Sesión</a>
-                            </li>
-                            
-                        {% else %}
+                            {% else %}
                             <li class="nav-item"><a class="nav-link active" aria-current="page" href="{{ url_for('usuario.formulario_registro') }}">Crear Cuenta</a></li> 
                             <li class="nav-item"><a class="nav-link active" aria-current="page" href="{{ url_for('auth.index') }}">Iniciar Sesión</a></li> 
                         {% endif %}
@@ -65,6 +35,19 @@
     </header>
 
     <div class="content-wrapper container-fluid mt-3"> 
+
+        <div>
+            <h2>¡Bienvenido(a) a Gestiona!</h2>
+            
+            <p>Desde aquí podrás:</p>
+            <ul>
+                <li>Ingresar la información sociodemográfica de la población trabajadora.</li>
+                <li>Hacer los reportes de ausentismo laboral por causa médica de los empleados, para lo cual necesitará el certificado médico de incapacidad.</li>
+                <li>Acceder a los consolidados tanto de la información sociodemográfica como de ausentismo laboral y descargarlos.</li>
+                <li>Acceder a las analíticas tanto de la información sociodemográfica como de ausentismo laboral, descargarlos y usarlos para los informes gerenciales.</li>
+            </ul>
+        </div>
+        
         <main class="content-area">
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
@@ -80,23 +63,15 @@
             {% endwith %}
 
             {% block content %}
-                <h2>¡Bienvenido(a) al Sistema Gestiona!</h2>
-                <p>Utiliza la barra de navegación para acceder a las diferentes funcionalidades.</p>
-                <p>Desde aquí podrás:</p>
-                <ul>
-                    <li>Ingresar la información sociodemográfica de la población trabajadora.</li>
-                    <li>Hacer los reportes de ausentismo laboral por causa médica de los empleados, para lo cual necesitará el certificado médico de incapacidad.</li>
-                    <li>Acceder a los consolidados tanto de la información sociodemográfica como de ausentismo laboral y descargarlos.</li>
-                    <li>Acceder a las analíticas tanto de la información sociodemográfica como de ausentismo laboral, descargarlos y usarlos para los informes gerenciales.</li>
-                </ul>
-            {% endblock %}
+                {% endblock %}
         </main>
-    </div>
+        </div>
 
     <footer class="main-footer mt-auto py-3 bg-light text-center">
         <hr>
         <p class="mb-0">&copy; {{ current_year if current_year else '2025' }} Gestiona | Rionegro, Antioquia</p>
     </footer>
+    
     {% block scripts %}
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     {% endblock %}

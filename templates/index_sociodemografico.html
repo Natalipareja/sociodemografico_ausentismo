@@ -5,6 +5,9 @@
 {% block head_extra %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style_infosociodemografico.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 {% endblock %}
 
 {% block content %}
@@ -12,7 +15,9 @@
     
     <form action="{{ url_for('sociodemografico.guardar_info') }}" method="POST" id="sociodemographicForm"
           data-url-ciudades="{{ url_for('sociodemografico.obtener_ciudades') }}"
-          data-url-area-proceso="{{ url_for('sociodemografico.obtener_area_proceso') }}">
+          data-url-area-proceso="{{ url_for('sociodemografico.obtener_area_proceso') }}"
+          data-url-inicio="{{ url_for('sociodemografico.intro') }}"
+          data-url-registrar-otro="{{ url_for('sociodemografico.formulario_sociodemografico') }}">
 
         <div id="progressBarContainer">
             <div id="progressBar">Paso 1 de 4</div>
@@ -240,8 +245,80 @@
     const sociodemographicForm = document.getElementById('sociodemographicForm');
     const urlCiudades = sociodemographicForm.dataset.urlCiudades;
     const urlAreaProceso = sociodemographicForm.dataset.urlAreaProceso;
+    const urlInicio = sociodemographicForm.dataset.urlInicio;
+    const urlRegistrarOtro = sociodemographicForm.dataset.urlRegistrarOtro;
 
+    // ----- INICIO DEL CÓDIGO CON SWEETALERT  -----
+    
     sociodemographicForm.addEventListener('submit', function(event) {
+    event.preventDefault(); // Evita que la página se recargue
+
+    // Primero, se asegura de que el paso actual sea válido
+    if (!validateStep(currentStep)) {
+        return; // Detiene la ejecución si faltan campos
+    }
+
+    const submitButton = document.getElementById('submitButton');
+    if(submitButton) submitButton.disabled = true; // Deshabilita el botón para evitar doble envío
+
+    const formData = new FormData(this);
+
+    // Se obtiene el nombre y apellido desde los campos del formulario.
+    const primerNombre = document.getElementById('primer_nombre').value.trim();
+    const primerApellido = document.getElementById('primer_apellido').value.trim();
+    const nombreCompleto = `${primerNombre} ${primerApellido}`;
+
+    // Se envían los datos al servidor
+    fetch(this.action, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Se revisa la respuesta del servidor
+        if (data.mensaje) {
+            // Si la respuesta es exitosa, se muestra la alerta SweetAlert
+            Swal.fire({
+                title: '¡Éxito!',
+                text: `${data.mensaje} para ${nombreCompleto}.`,
+                icon: 'success',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#aaa',
+                confirmButtonText: 'Registrar otro trabajador',
+                cancelButtonText: 'Volver al inicio', // Texto ajustado para mayor claridad
+                allowOutsideClick: false,
+            }).then((result) => {
+                // Si el usuario presiona "Registrar otro trabajador"
+                if (result.isConfirmed) {
+                    // Redirige a la URL para registrar otro empleado
+                    window.location.href = urlRegistrarOtro;
+                }
+                // Si el usuario presiona "Volver al inicio"
+                else if (result.dismiss === Swal.DismissReason.cancel) {
+                    // Redirige a la URL de inicio
+                    window.location.href = urlInicio;
+                }
+            });
+        } else if (data.error) {
+            // Si el servidor devuelve un error conocido
+            Swal.fire({ icon: 'error', title: 'Error al Guardar', text: data.error });
+        }
+    })
+    .catch(error => {
+        // Si hay un error de conexión
+        console.error('Error en fetch:', error);
+        Swal.fire({ icon: 'error', title: 'Error de Conexión', text: 'No se pudo comunicar con el servidor.' });
+    })
+    .finally(() => {
+        // Se vuelve a habilitar el botón de guardar
+        if(submitButton) submitButton.disabled = false;
+    });
+});
+    // ----- FIN DEL CÓDIGO CON SWEETALERT -----
+
+
+  /**  sociodemographicForm.addEventListener('submit', function(event) {
         event.preventDefault(); 
         // Validar el último paso antes de enviar
         if (currentStep === totalSteps && !validateStep(currentStep)) { // Asegúrate que validateStep esté definida y funcione como esperas
@@ -289,7 +366,7 @@
         .finally(() => {
             if(submitButton) submitButton.disabled = false;
         });
-    });
+    });**/
 
     function cargarCiudades() {
         const departamentoId = document.getElementById('departamento').value;
