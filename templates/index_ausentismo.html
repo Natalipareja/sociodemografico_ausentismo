@@ -5,6 +5,8 @@
 {% block head_extra %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style_reporte_ausentismo.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 {% endblock %}
 
 {% block content %}
@@ -12,7 +14,10 @@
     <div id="form-message" class="message" style="display: none;"></div>
 
     <form id="ausentismo-form" action="{{ url_for('ausentismo.guardar_ausentismo') }}" method="POST"
-          data-url-obtener-empleado="{{ url_for('ausentismo.obtener_datos_empleado') }}">
+          data-url-obtener-empleado="{{ url_for('ausentismo.obtener_datos_empleado') }}"
+          data-url-registrar-otro="{{ url_for('ausentismo.formulario_ausentismo') }}"
+          data-url-inicio="{{ url_for('ausentismo.consolidado_ausentismo') }}">
+
 
         <div id="progressBarContainer">
             <div id="progressBar">Paso 1 de 3</div>
@@ -393,8 +398,90 @@ document.addEventListener('DOMContentLoaded', function () {
           }
       });
     }
+    
+  if (form) {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
 
-    if (form) {
+            if (currentStep === totalSteps && !validateStep(currentStep)) {
+                return;
+            }
+            ocultarMensaje();
+
+            // --- INICIO DEL CAMBIO ---
+            // 1. Construimos el nombre completo a partir de los campos del formulario.
+            //    (Las variables como 'primerNombreInput' ya existen en tu script original).
+            let nombreCompleto = primerNombreInput.value.trim();
+            if (segundoNombreInput.value.trim()) {
+                nombreCompleto += ' ' + segundoNombreInput.value.trim();
+            }
+            nombreCompleto += ' ' + primerApellidoInput.value.trim();
+            if (segundoApellidoInput.value.trim()) {
+                nombreCompleto += ' ' + segundoApellidoInput.value.trim();
+            }
+
+            // 2. Convertimos el nombre a mayúsculas.
+            const nombreEnMayusculas = nombreCompleto.toUpperCase();
+            // --- FIN DEL CAMBIO ---
+
+            const urlInicio = form.dataset.urlInicio;
+            const urlRegistrarOtro = form.dataset.urlRegistrarOtro;
+            
+            const submitButton = document.getElementById('submitButton');
+            if (submitButton) submitButton.disabled = true;
+
+            const formData = new FormData(form);
+            if(document.getElementById('codigo')) formData.set('codigo', document.getElementById('codigo').value);
+
+            fetch(form.action, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    return response.json().then(data => ({ ok: response.ok, data: data }));
+                } else {
+                    return response.text().then(text => { throw new Error("Respuesta inesperada del servidor: " + text); });
+                }
+            })
+            .then(result => {
+                if (result.ok && result.data.mensaje) {
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: `Se guardaron los datos para: ${nombreEnMayusculas}`, // <-- LÍNEA MODIFICADA
+                        icon: 'success',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#aaa',
+                        confirmButtonText: 'Registrar otro ausentismo',
+                        cancelButtonText: 'Ver consolidado',
+                        allowOutsideClick: false,
+                    }).then((swalResult) => {
+                        if (swalResult.isConfirmed) {
+                            window.location.href = urlRegistrarOtro;
+                        } else if (swalResult.dismiss === Swal.DismissReason.cancel) {
+                            window.location.href = urlInicio;
+                        }
+                    });
+                } else if (result.data && result.data.error) {
+                    Swal.fire({ icon: 'error', title: 'Error al Guardar', text: result.data.error });
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Error Inesperado', text: 'La respuesta del servidor no fue la esperada.' });
+                }
+            })
+            .catch(error => {
+                console.error('Error en fetch:', error);
+                Swal.fire({ icon: 'error', title: 'Error de Conexión', text: 'No se pudo comunicar con el servidor.' });
+            })
+            .finally(() => {
+                if (submitButton) submitButton.disabled = false;
+            });
+        });
+    }
+
+    
+    /**if (form) {
       form.addEventListener('submit', function(event) {
           event.preventDefault();
           // Validar el último paso del wizard antes de enviar
@@ -445,7 +532,7 @@ document.addEventListener('DOMContentLoaded', function () {
               if (submitButton) submitButton.disabled = false;
           });
       });
-    }
+    }**/
 
 
 

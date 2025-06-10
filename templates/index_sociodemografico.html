@@ -16,8 +16,8 @@
     <form action="{{ url_for('sociodemografico.guardar_info') }}" method="POST" id="sociodemographicForm"
           data-url-ciudades="{{ url_for('sociodemografico.obtener_ciudades') }}"
           data-url-area-proceso="{{ url_for('sociodemografico.obtener_area_proceso') }}"
-          data-url-inicio="{{ url_for('sociodemografico.intro') }}"
-          data-url-registrar-otro="{{ url_for('sociodemografico.formulario_sociodemografico') }}">
+          data-url-registrar-otro="{{ url_for('sociodemografico.formulario_sociodemografico') }}"
+          data-url-inicio="{{ url_for('sociodemografico.consolidado_sociodemografico_tabla') }}">
 
         <div id="progressBarContainer">
             <div id="progressBar">Paso 1 de 4</div>
@@ -253,20 +253,33 @@
     sociodemographicForm.addEventListener('submit', function(event) {
     event.preventDefault(); // Evita que la página se recargue
 
-    // Primero, se asegura de que el paso actual sea válido
+    // Llama a tu función de validación de pasos del wizard
     if (!validateStep(currentStep)) {
-        return; // Detiene la ejecución si faltan campos
+        return; 
     }
 
+    // Deshabilita el botón para evitar envíos duplicados
     const submitButton = document.getElementById('submitButton');
-    if(submitButton) submitButton.disabled = true; // Deshabilita el botón para evitar doble envío
+    if(submitButton) submitButton.disabled = true;
 
     const formData = new FormData(this);
 
-    // Se obtiene el nombre y apellido desde los campos del formulario.
+    // --- 1. Lógica para obtener y formatear el nombre en mayúsculas ---
     const primerNombre = document.getElementById('primer_nombre').value.trim();
+    const segundoNombre = document.getElementById('segundo_nombre').value.trim();
     const primerApellido = document.getElementById('primer_apellido').value.trim();
-    const nombreCompleto = `${primerNombre} ${primerApellido}`;
+    const segundoApellido = document.getElementById('segundo_apellido').value.trim();
+
+    let nombreCompleto = primerNombre;
+    if (segundoNombre) {
+        nombreCompleto += ' ' + segundoNombre;
+    }
+    nombreCompleto += ' ' + primerApellido;
+    if (segundoApellido) {
+        nombreCompleto += ' ' + segundoApellido;
+    }
+    // Se convierte el nombre completo a mayúsculas
+    const nombreEnMayusculas = nombreCompleto.toUpperCase();
 
     // Se envían los datos al servidor
     fetch(this.action, {
@@ -275,43 +288,51 @@
     })
     .then(response => response.json())
     .then(data => {
-        // Se revisa la respuesta del servidor
+        // Si el servidor responde con un mensaje de éxito
         if (data.mensaje) {
-            // Si la respuesta es exitosa, se muestra la alerta SweetAlert
+            // --- 2. Configuración de SweetAlert con 2 botones ---
             Swal.fire({
                 title: '¡Éxito!',
-                text: `${data.mensaje} para ${nombreCompleto}.`,
+                text: `Se registraron los datos para: ${nombreEnMayusculas}`, // Muestra el nombre formateado
                 icon: 'success',
-                showCancelButton: true,
+                showCancelButton: true, // Habilita el segundo botón
                 confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#aaa',
-                confirmButtonText: 'Registrar otro trabajador',
-                cancelButtonText: 'Volver al inicio', // Texto ajustado para mayor claridad
+                cancelButtonColor: '#5a6268',
+                confirmButtonText: 'Registrar otro empleado', // Opción 1
+                cancelButtonText: 'Ver consolidado',          // Opción 2
                 allowOutsideClick: false,
             }).then((result) => {
-                // Si el usuario presiona "Registrar otro trabajador"
+                // --- 3. Lógica de redirección basada en la elección del usuario ---
+                // Se usan las variables 'urlRegistrarOtro' y 'urlInicio' que tu script
+                // ya define en la parte superior, asegurando que las rutas son correctas.
                 if (result.isConfirmed) {
-                    // Redirige a la URL para registrar otro empleado
+                    // Si se presiona "Registrar otro empleado"
                     window.location.href = urlRegistrarOtro;
-                }
-                // Si el usuario presiona "Volver al inicio"
-                else if (result.dismiss === Swal.DismissReason.cancel) {
-                    // Redirige a la URL de inicio
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    // Si se presiona "Ver consolidado"
                     window.location.href = urlInicio;
                 }
             });
         } else if (data.error) {
-            // Si el servidor devuelve un error conocido
-            Swal.fire({ icon: 'error', title: 'Error al Guardar', text: data.error });
+            // Manejo de errores controlados desde el servidor
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al Guardar',
+                text: data.error
+            });
         }
     })
     .catch(error => {
-        // Si hay un error de conexión
+        // Manejo de errores de red o conexión
         console.error('Error en fetch:', error);
-        Swal.fire({ icon: 'error', title: 'Error de Conexión', text: 'No se pudo comunicar con el servidor.' });
+        Swal.fire({
+            icon: 'error',
+            title: 'Error de Conexión',
+            text: 'No se pudo comunicar con el servidor.'
+        });
     })
     .finally(() => {
-        // Se vuelve a habilitar el botón de guardar
+        // Se vuelve a habilitar el botón de guardar en cualquier caso
         if(submitButton) submitButton.disabled = false;
     });
 });
